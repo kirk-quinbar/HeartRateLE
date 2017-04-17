@@ -29,9 +29,9 @@ SOFTWARE.
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Storage.Streams;
-using Wwssi.Bluetooth.HeartRateMonitor.Base;
+using Wwssi.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.Parsers
+namespace Wwssi.Bluetooth.Parsers
 {
     public class BatteryLevelParser : BleValueParser<byte, byte>
     {

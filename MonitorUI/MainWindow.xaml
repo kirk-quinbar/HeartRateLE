@@ -6,7 +6,56 @@
         xmlns:local="clr-namespace:MonitorUI"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+    <Grid >
+        <StackPanel>
+            <TextBlock x:Name="TxtStatus"
+                       TextWrapping="Wrap"
+                       Text="disconnected"
+                       HorizontalAlignment="Center"
+                       Margin="0,10,0,0"/>
+            <TextBlock x:Name="TxtBattery"
+                       TextWrapping="Wrap"
+                       Text="battery level: --"
+                       HorizontalAlignment="Center"
+                       Margin="0,10,0,0"/>
+            <TextBlock x:Name="TxtHr"
+                       TextWrapping="Wrap"
+                       Text="--"
+                       HorizontalAlignment="Center"
+                       Margin="0,40"
+                       FontSize="106.667"/>
+            <Button x:Name="BtnConnect"
+                    Content="Connect"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Width="100"
+                    Margin="0,0,10,10"
+                    Click="BtnConnect_Click"/>
+            <Button x:Name="BtnStart"
+                    Content="Start"
+                    IsEnabled="False"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Width="100"
+                    Margin="0,0,10,10"
+                    Click="BtnStart_Click"/>
+            <Button x:Name="BtnStop"
+                    Content="Stop"
+                    IsEnabled="False"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Width="100"
+                    Margin="0,0,10,10"
+                    Click="BtnStop_Click"/>
+            <Button x:Name="BtnReadInfo"
+                    Content="Update Info"
+                    IsEnabled="False"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Width="100"
+                    Margin="0,0,10,10"
+                    Click="BtnReadInfo_Click"/>
+        </StackPanel>
+
     </Grid>
 </Window>

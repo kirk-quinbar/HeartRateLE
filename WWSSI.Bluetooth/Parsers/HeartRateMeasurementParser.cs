@@ -26,31 +26,49 @@ SOFTWARE.
 // with plugin Windows 10 UWP Client (version 1.0.0 released on 2016.03.16).
 // Plugin developed by Matchbox Mobile Limited.
 
-using Wwssi.Bluetooth.HeartRateMonitor.Base;
+using System;
+using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Storage.Streams;
+using Wwssi.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.HeartRate
+namespace Wwssi.Bluetooth.Parsers
 {
-    public class BleHeartRateService : BleService
+    public class HeartRateMeasurementParser : BleValueParser<short, short>
     {
         /// <summary>
-        /// Heart Rate Measurement characteristic.
+        /// Parsing input bytes according to official Bluetooth specification:
+        /// https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
         /// </summary>
-        public BleCharacteristic HeartRateMeasurement { get; set; } = new BleCharacteristic("Heart Rate Measurement", "2A37", true);
-
-        /// <summary>
-        /// Body Sensor Location characteristic.
-        /// </summary>
-        public BleCharacteristic BodySensorLocation { get; set; } = new BleCharacteristic("Body Sensor Location", "2A38", false);
-
-        /// <summary>
-        /// Heart Rate Control Point characteristic.
-        /// </summary>
-        public BleCharacteristic HeartRateControlPoint { get; set; } = new BleCharacteristic("Heart Rate Control Point", "2A39", false);
-
-        private const bool IsServiceMandatory = true;
-
-        public BleHeartRateService() : base("180D", IsServiceMandatory)
+        /// <param name="raw">input buffer with raw bytes of the value</param>
+        /// <returns></returns>
+        protected override short ParseReadValue(IBuffer raw)
         {
+            if (raw == null || raw.Length == 0)
+                return -1;
+
+            var reader = new BinaryReader(raw.AsStream());
+            short value = 0;
+            byte flag = reader.ReadByte();
+
+            if (IsBitSet(flag, 0))
+            {
+                // UINT16 format
+                reader.ReadByte(); // omit this, as it is not used in 16 bit format
+                value = (short)reader.ReadUInt16();
+            }
+            else
+            {
+                // UINT8 format
+                value = (short)reader.ReadByte();
+            }
+
+            return value;
+        }
+
+        protected override IBuffer ParseWriteValue(short data)
+        {
+            throw new NotImplementedException();
         }
     }
 }

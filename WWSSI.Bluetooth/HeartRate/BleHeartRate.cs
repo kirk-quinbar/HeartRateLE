@@ -33,9 +33,9 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
-using Wwssi.Bluetooth.HeartRateMonitor.Base;
+using Wwssi.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.HeartRate
+namespace Wwssi.Bluetooth.HeartRate
 {
     public class BleHeartRate : BleDevice
     {

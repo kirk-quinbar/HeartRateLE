@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.Base
+namespace Wwssi.Bluetooth.Base
 {
     /// <summary>
     /// Base class for all Value parsers. For any concrete implementation developer needs to implement

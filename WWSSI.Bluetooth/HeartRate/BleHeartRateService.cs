@@ -26,20 +26,30 @@ SOFTWARE.
 // with plugin Windows 10 UWP Client (version 1.0.0 released on 2016.03.16).
 // Plugin developed by Matchbox Mobile Limited.
 
-using Wwssi.Bluetooth.HeartRateMonitor.Base;
+using Wwssi.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.HeartRate
+namespace Wwssi.Bluetooth.HeartRate
 {
-    public class BleBatteryServiceService : BleService
+    public class BleHeartRateService : BleService
     {
         /// <summary>
-        /// Battery Level characteristic.
+        /// Heart Rate Measurement characteristic.
         /// </summary>
-        public BleCharacteristic BatteryLevel { get; set; } = new BleCharacteristic("Battery Level", "2A19", true);  
-        
+        public BleCharacteristic HeartRateMeasurement { get; set; } = new BleCharacteristic("Heart Rate Measurement", "2A37", true);
+
+        /// <summary>
+        /// Body Sensor Location characteristic.
+        /// </summary>
+        public BleCharacteristic BodySensorLocation { get; set; } = new BleCharacteristic("Body Sensor Location", "2A38", false);
+
+        /// <summary>
+        /// Heart Rate Control Point characteristic.
+        /// </summary>
+        public BleCharacteristic HeartRateControlPoint { get; set; } = new BleCharacteristic("Heart Rate Control Point", "2A39", false);
+
         private const bool IsServiceMandatory = true;
 
-        public BleBatteryServiceService() : base("180F", IsServiceMandatory)
+        public BleHeartRateService() : base("180D", IsServiceMandatory)
         {
         }
     }

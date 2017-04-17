@@ -95,6 +95,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WWSSI.Bluetooth\Wwssi.Bluetooth.csproj">
+      <Project>{ce863405-a1f9-464d-aeed-e265c8244689}</Project>
+      <Name>Wwssi.Bluetooth</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

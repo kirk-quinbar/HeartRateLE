@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.Base
+namespace Wwssi.Bluetooth.Base
 {
     public class BleCharacteristic : BleBase
     {

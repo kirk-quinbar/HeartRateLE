@@ -32,9 +32,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
-using Wwssi.Bluetooth.HeartRateMonitor.Base;
+using Wwssi.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.HeartRateMonitor.Parsers
+namespace Wwssi.Bluetooth.Parsers
 {
     public class StringParser : BleValueParser<String, String>
     {
