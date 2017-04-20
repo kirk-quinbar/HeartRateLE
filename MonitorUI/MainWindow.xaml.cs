@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using MonitorUI;
 using System.Diagnostics;
 using Wwssi.Bluetooth.Events;
+using System.ComponentModel;
 
 namespace MonitorUI
 {
@@ -31,6 +32,11 @@ namespace MonitorUI
             _heartRateMonitor = new Wwssi.Bluetooth.HeartRateMonitor();
         }
 
+        protected async override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            await _heartRateMonitor.Disconnect();
+        }
         //private async void CurrentOnSuspending(object sender, SuspendingEventArgs suspendingEventArgs)
         //{
         ////    if (HrDevice != null) await HrDevice.Close();
