@@ -17,13 +17,13 @@ namespace Wwssi.Bluetooth
         private readonly HeartRateMeasurementParser _heartRateParser;
         private readonly BatteryLevelParser _batteryParser;
 
-        public event EventHandler ConnectionStatusChanged;
+        public event EventHandler<Events.ConnectionStatusChangedEventArgs> ConnectionStatusChanged;
         protected virtual void OnConnectionStatusChanged(Events.ConnectionStatusChangedEventArgs e)
         {
             ConnectionStatusChanged?.Invoke(this, e);
         }
 
-        public event EventHandler ValueChanged;
+        public event EventHandler<Events.ValueChangedEventArgs> ValueChanged;
         protected virtual void OnValueChanged(Events.ValueChangedEventArgs e)
         {
             ValueChanged?.Invoke(this, e);

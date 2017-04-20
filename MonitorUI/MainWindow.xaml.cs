@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MonitorUI;
 using System.Diagnostics;
+using Wwssi.Bluetooth.Events;
 
 namespace MonitorUI
 {
@@ -38,31 +39,24 @@ namespace MonitorUI
         private async void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
             var device = await _heartRateMonitor.Connect();
-            if (!device.IsConnected)
-            {
-                MessageBox.Show(device.ErrorMessage);
-            }
-            else
-            {
-                MessageBox.Show(device.Name);
-            }
-            //d("Button CONNECT clicked.");
-            //HrDevice = await BleHeartRate.FirstOrDefault();
-            //if (HrDevice == null)
-            //{
-            //    d("I was not able to find any HR device!");
-            //    return;
-            //}
 
-            //d("Found device: " + HrDevice.Name + " IsConnected=" + HrDevice.IsConnected);
-            //// we should always monitor the connection status
-            //HrDevice.DeviceConnectionStatusChanged -= HrDeviceOnDeviceConnectionStatusChanged;
-            //HrDevice.DeviceConnectionStatusChanged += HrDeviceOnDeviceConnectionStatusChanged;
+            d("Button CONNECT clicked.");
+            //HrDevice = await BleHeartRate.FirstOrDefault();
+            if (device == null)
+            {
+                MessageBox.Show("Could not find any heart rate device!");
+                return;
+            }
+
+            d("Found device: " + device.Name + " IsConnected=" + device.IsConnected);
+            // we should always monitor the connection status
+            _heartRateMonitor.ConnectionStatusChanged -= HrDeviceOnDeviceConnectionStatusChanged;
+            _heartRateMonitor.ConnectionStatusChanged += HrDeviceOnDeviceConnectionStatusChanged;
 
             //// we can create value parser and listen for parsed values of given characteristic
             //HrParser.ConnectWithCharacteristic(HrDevice.HeartRate.HeartRateMeasurement);
-            //HrParser.ValueChanged -= HrParserOnValueChanged;
-            //HrParser.ValueChanged += HrParserOnValueChanged;
+            _heartRateMonitor.ValueChanged -= HrParserOnValueChanged;
+            _heartRateMonitor.ValueChanged += HrParserOnValueChanged;
 
             //// connect also battery level parser to proper characteristic
             //BatteryParser.ConnectWithCharacteristic(HrDevice.BatteryService.BatteryLevel);
@@ -80,53 +74,53 @@ namespace MonitorUI
         //    d("RAW value change event received:" + args.Value);
         //}
 
-        //private async void HrParserOnValueChanged(object device, ValueChangedEventArgs<short> arg)
-        //{
-        //    await RunOnUiThread(() =>
-        //    {
-        //        d("Got new measurement: " + arg.Value);
-        //        TxtHr.Text = String.Format("{0} bpm", arg.Value);
-        //    });
-        //}
+        private async void HrParserOnValueChanged(object sender, ValueChangedEventArgs arg)
+        {
+            await RunOnUiThread(() =>
+            {
+                d("Got new measurement: " + arg.BeatsPerMinute);
+                TxtHr.Text = String.Format("{0} bpm", arg.BeatsPerMinute);
+            });
+        }
 
-        //private async void HrDeviceOnDeviceConnectionStatusChanged(object device, BleDeviceConnectionStatusChangedEventArgs args)
-        //{
-        //    d("Current connection status is: " + args.ConnectionStatus);
-        //    await RunOnUiThread(async () =>
-        //    {
-        //        bool connected = (args.ConnectionStatus == BluetoothConnectionStatus.Connected);
-        //        if (connected)
-        //        {
-        //            TxtStatus.Text = HrDevice.Name + ": connected";
-        //            byte battery = await BatteryParser.Read();
-        //            TxtBattery.Text = String.Format("battery level: {0}%", battery);
-        //        }
-        //        else
-        //        {
-        //            TxtStatus.Text = "disconnected";
-        //            TxtBattery.Text = "battery level: --";
-        //            TxtHr.Text = "--";
-        //        }
+        private async void HrDeviceOnDeviceConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
+        {
+            d("Current connection status is: " + args.IsConnected);
+            await RunOnUiThread(async () =>
+            {
+                bool connected = args.IsConnected;
+                if (connected)
+                {
+                    var device = await _heartRateMonitor.GetDeviceInfo();
+                    TxtStatus.Text = device.Name + ": connected";
+                    TxtBattery.Text = String.Format("battery level: {0}%", device.BatteryPercent);
+                }
+                else
+                {
+                    TxtStatus.Text = "disconnected";
+                    TxtBattery.Text = "battery level: --";
+                    TxtHr.Text = "--";
+                }
 
-        //        BtnStart.IsEnabled = connected;
-        //        BtnStop.IsEnabled = connected;
-        //        BtnReadInfo.IsEnabled = connected;
-        //    });
-        //}
+                BtnStart.IsEnabled = connected;
+                BtnStop.IsEnabled = connected;
+                BtnReadInfo.IsEnabled = connected;
+            });
+        }
 
         private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            //d("Button START clicked.");
-            //await HrParser.EnableNotifications();
-            //d("Notification enabled");
+            d("Button START clicked.");
+            await _heartRateMonitor.EnableNotifications();
+            d("Notification enabled");
         }
 
         private async void BtnStop_Click(object sender, RoutedEventArgs e)
         {
-            //d("Button STOP clicked.");
-            //await HrParser.DisableNotifications();
-            //d("Notification disabled.");
-            //TxtHr.Text = "--";
+            d("Button STOP clicked.");
+            await _heartRateMonitor.DisableNotifications();
+            d("Notification disabled.");
+            TxtHr.Text = "--";
         }
 
         private async void BtnReadInfo_Click(object sender, RoutedEventArgs e)
@@ -140,7 +134,7 @@ namespace MonitorUI
             //var producer = await HrDevice.DeviceInformation.ManufacturerNameString.ReadAsString();
             //var serialNumber = await HrDevice.DeviceInformation.SerialNumberString.ReadAsString();
             //var modelNumber = await HrDevice.DeviceInformation.ModelNumberString.ReadAsString();
-            
+
             d($" Manufacturer : {deviceInfo.Manufacturer}"); d("");
             d($"    Model : {deviceInfo.ModelNumber}"); d("");
             d($"      S/N : {deviceInfo.SerialNumber}"); d("");
@@ -158,13 +152,13 @@ namespace MonitorUI
             Debug.WriteLine(txt);
         }
 
-        //private async Task RunOnUiThread(Action a)
-        //{
-        //    await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-        //    {
-        //        a();
-        //    });
-        //}
+        private async Task RunOnUiThread(Action a)
+        {
+            await this.Dispatcher.InvokeAsync(() =>
+           {
+               a();
+           });
+        }
 
         //private BleHeartRate HrDevice { get; set; }
         //private HeartRateMeasurementParser HrParser { get; } = new HeartRateMeasurementParser();
