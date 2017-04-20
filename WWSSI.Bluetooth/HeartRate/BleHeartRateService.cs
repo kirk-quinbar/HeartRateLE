@@ -30,7 +30,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.HeartRate
 {
-    public class BleHeartRateService : BleService
+    internal class BleHeartRateService : BleService
     {
         /// <summary>
         /// Heart Rate Measurement characteristic.

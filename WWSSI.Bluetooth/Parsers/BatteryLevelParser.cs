@@ -33,7 +33,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.Parsers
 {
-    public class BatteryLevelParser : BleValueParser<byte, byte>
+    internal class BatteryLevelParser : BleValueParser<byte, byte>
     {
         protected override byte ParseReadValue(IBuffer raw)
         {

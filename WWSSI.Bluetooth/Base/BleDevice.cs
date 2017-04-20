@@ -39,7 +39,7 @@ namespace Wwssi.Bluetooth.Base
     /// Top Level Bluetooth device's wrapper class. It represents the whole device and includes references
     /// to all device's information and services.
     /// </summary>
-    public class BleDevice : BleBase
+    internal class BleDevice : BleBase
     {
         private List<BleService> AllServices { get; } = new List<BleService>();
 
@@ -158,7 +158,7 @@ namespace Wwssi.Bluetooth.Base
 	/// <summary>
 	/// Custom event args type, for connection status changed events.
 	/// </summary>
-    public class BleDeviceConnectionStatusChangedEventArgs : EventArgs
+    internal class BleDeviceConnectionStatusChangedEventArgs : EventArgs
     {
         public BluetoothConnectionStatus ConnectionStatus { get; }
 

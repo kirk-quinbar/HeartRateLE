@@ -30,7 +30,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.HeartRate
 {
-    public class BleDeviceInformationService : BleService
+    internal class BleDeviceInformationService : BleService
     {
         /// <summary>
         /// Manufacturer Name String characteristic.

@@ -41,7 +41,7 @@ namespace Wwssi.Bluetooth.Base
     /// <summary>
     /// Base class for all services included in the Bluetooth Smart device.
     /// </summary>
-    public class BleService : BleBase
+    internal class BleService : BleBase
     {
         /// <summary>
         /// Tells if given service is mandatory for the device.

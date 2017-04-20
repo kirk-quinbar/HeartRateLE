@@ -30,7 +30,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.HeartRate
 {
-    public class BleBatteryServiceService : BleService
+    internal class BleBatteryServiceService : BleService
     {
         /// <summary>
         /// Battery Level characteristic.

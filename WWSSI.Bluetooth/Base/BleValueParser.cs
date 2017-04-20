@@ -42,7 +42,7 @@ namespace Wwssi.Bluetooth.Base
     /// </summary>
     /// <typeparam name="TRead">type of the read results</typeparam>
     /// <typeparam name="TWrite">type of the object used for write operations</typeparam>
-    public abstract class BleValueParser<TRead, TWrite>
+    internal abstract class BleValueParser<TRead, TWrite>
     {
         private BleCharacteristic Characteristic { get; set; }
         
@@ -206,7 +206,7 @@ namespace Wwssi.Bluetooth.Base
     /// Custom value changed event arg type, dedicated for particular
     /// value parser's TRead type
     /// </summary>
-    public class ValueChangedEventArgs<TRead> : EventArgs
+    internal class ValueChangedEventArgs<TRead> : EventArgs
     {
         public TRead Value { get; set; }
 

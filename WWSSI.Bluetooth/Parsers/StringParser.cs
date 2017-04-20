@@ -36,7 +36,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.Parsers
 {
-    public class StringParser : BleValueParser<String, String>
+    internal class StringParser : BleValueParser<String, String>
     {
         private static readonly StringParser GlobalInstanceUtf8 = new StringParser().SetStringFormat(GattPresentationFormatTypes.Utf8);
         private static readonly StringParser GlobalInstanceUtf16 = new StringParser().SetStringFormat(GattPresentationFormatTypes.Utf16);
@@ -102,7 +102,7 @@ namespace Wwssi.Bluetooth.Parsers
         }
     }
 
-    public static class BleCharacteristicString
+    internal static class BleCharacteristicString
     {
         public static async Task<string> ReadAsString(this BleCharacteristic me)
         {

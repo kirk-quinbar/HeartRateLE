@@ -34,7 +34,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.Parsers
 {
-    public class HeartRateMeasurementParser : BleValueParser<short, short>
+    internal class HeartRateMeasurementParser : BleValueParser<short, short>
     {
         /// <summary>
         /// Parsing input bytes according to official Bluetooth specification:

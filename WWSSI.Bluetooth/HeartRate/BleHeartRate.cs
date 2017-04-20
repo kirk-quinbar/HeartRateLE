@@ -37,7 +37,7 @@ using Wwssi.Bluetooth.Base;
 
 namespace Wwssi.Bluetooth.HeartRate
 {
-    public class BleHeartRate : BleDevice
+    internal class BleHeartRate : BleDevice
     {
         private static readonly string[] RequiredServices = new string[] { "180D", "180A", "180F" };
         public BleHeartRateService  HeartRate { get; set; } = new BleHeartRateService();

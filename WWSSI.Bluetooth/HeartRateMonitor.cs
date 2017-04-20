@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Devices.Bluetooth;
 using Wwssi.Bluetooth.Base;
+using Wwssi.Bluetooth.Events;
 using Wwssi.Bluetooth.HeartRate;
 using Wwssi.Bluetooth.Parsers;
 
@@ -14,6 +16,18 @@ namespace Wwssi.Bluetooth
         private BleHeartRate _heartRateDevice;
         private readonly HeartRateMeasurementParser _heartRateParser;
         private readonly BatteryLevelParser _batteryParser;
+
+        public event EventHandler ConnectionStatusChanged;
+        protected virtual void OnConnectionStatusChanged(Events.ConnectionStatusChangedEventArgs e)
+        {
+            ConnectionStatusChanged?.Invoke(this, e);
+        }
+
+        public event EventHandler ValueChanged;
+        protected virtual void OnValueChanged(Events.ValueChangedEventArgs e)
+        {
+            ValueChanged?.Invoke(this, e);
+        }
 
         public HeartRateMonitor()
         {
@@ -33,7 +47,6 @@ namespace Wwssi.Bluetooth
                 };
             }
 
-            //            d("Found device: " + HrDevice.Name + " IsConnected=" + HrDevice.IsConnected);
             // we should always monitor the connection status
             _heartRateDevice.DeviceConnectionStatusChanged -= BleDeviceConnectionStatusChanged;
             _heartRateDevice.DeviceConnectionStatusChanged += BleDeviceConnectionStatusChanged;
@@ -60,37 +73,23 @@ namespace Wwssi.Bluetooth
             };
         }
 
-        private void BleDeviceValueChanged(object device, ValueChangedEventArgs<short> arg)
+        private void BleDeviceValueChanged(object sender, ValueChangedEventArgs<short> e)
         {
-            //await RunOnUiThread(() =>
-            //{
-            //    d("Got new measurement: " + arg.Value);
-            //    TxtHr.Text = String.Format("{0} bpm", arg.Value);
-            //});
+            var args = new Events.ValueChangedEventArgs()
+            {
+                BeatsPerMinute = e.Value
+            };
+            OnValueChanged(args);
         }
-        private void BleDeviceConnectionStatusChanged(object device, BleDeviceConnectionStatusChangedEventArgs args)
-        {
-            //d("Current connection status is: " + args.ConnectionStatus);
-            //await RunOnUiThread(async () =>
-            //{
-            //    bool connected = (args.ConnectionStatus == BluetoothConnectionStatus.Connected);
-            //    if (connected)
-            //    {
-            //        TxtStatus.Text = HrDevice.Name + ": connected";
-            //        byte battery = await BatteryParser.Read();
-            //        TxtBattery.Text = String.Format("battery level: {0}%", battery);
-            //    }
-            //    else
-            //    {
-            //        TxtStatus.Text = "disconnected";
-            //        TxtBattery.Text = "battery level: --";
-            //        TxtHr.Text = "--";
-            //    }
 
-            //    BtnStart.IsEnabled = connected;
-            //    BtnStop.IsEnabled = connected;
-            //    BtnReadInfo.IsEnabled = connected;
-            //});
+        private void BleDeviceConnectionStatusChanged(object sender, BleDeviceConnectionStatusChangedEventArgs e)
+        {
+            var args = new ConnectionStatusChangedEventArgs()
+            {
+                IsConnected = (e.ConnectionStatus == BluetoothConnectionStatus.Connected)
+            };
+
+            OnConnectionStatusChanged(args);
         }
 
         public async Task Disconnect()

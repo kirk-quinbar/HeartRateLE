@@ -34,7 +34,7 @@ using Windows.Storage.Streams;
 
 namespace Wwssi.Bluetooth.Base
 {
-    public class BleCharacteristic : BleBase
+    internal class BleCharacteristic : BleBase
     {
         #region Characteristic's properties
         
@@ -275,7 +275,7 @@ namespace Wwssi.Bluetooth.Base
     /// <summary>
     /// Class encapsulating the raw IBUffer with the characteristic value,
     /// </summary>	
-    public class ValueChangedEventArgs : EventArgs
+    internal class ValueChangedEventArgs : EventArgs
     {
         /// <summary>
         /// Original's characteristic buffer with the value.
