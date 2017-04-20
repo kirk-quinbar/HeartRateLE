@@ -50,6 +50,8 @@
     <Compile Include="Base\BleDevice.cs" />
     <Compile Include="Base\BleService.cs" />
     <Compile Include="Base\BleValueParser.cs" />
+    <Compile Include="Events\ConnectionStatusChangedEventArgs.cs" />
+    <Compile Include="Events\ValueChangedEventArgs.cs" />
     <Compile Include="HeartRateMonitor.cs" />
     <Compile Include="HeartRate\BleBatteryServiceService.cs" />
     <Compile Include="HeartRate\BleDeviceInformationService.cs" />
@@ -59,6 +61,8 @@
     <Compile Include="Parsers\HeartRateMeasurementParser.cs" />
     <Compile Include="Parsers\StringParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schema\Device.cs" />
+    <Compile Include="Schema\DeviceInfo.cs" />
     <Compile Include="ValueChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup />
