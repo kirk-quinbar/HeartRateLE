@@ -40,10 +40,10 @@ namespace Wwssi.Bluetooth.HeartRate
     internal class BleHeartRate : BleDevice
     {
         private static readonly string[] RequiredServices = new string[] { "180D", "180A", "180F" };
-        public BleHeartRateService  HeartRate { get; set; } = new BleHeartRateService();
-        public BleDeviceInformationService  DeviceInformation { get; set; } = new BleDeviceInformationService();
-        public BleBatteryServiceService  BatteryService { get; set; } = new BleBatteryServiceService();
-        
+        public BleHeartRateService HeartRate { get; set; } = new BleHeartRateService();
+        public BleDeviceInformationService DeviceInformation { get; set; } = new BleDeviceInformationService();
+        public BleBatteryServiceService BatteryService { get; set; } = new BleBatteryServiceService();
+
 
         /// <summary>
         /// Search and returns all Bluetooth Smart devices matching BleHeartRate profile
@@ -100,11 +100,17 @@ namespace Wwssi.Bluetooth.HeartRate
             return all.FirstOrDefault();
         }
 
+        public static async Task<BleHeartRate> FindByName(string deviceName)
+        {
+            var all = await FindAll();
+            return all.FirstOrDefault(a => a.Name.Equals(deviceName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         private BleHeartRate(DeviceInformation device, BluetoothLEDevice leDevice) : base(device, leDevice)
-        {   
-            RegisterNewService(HeartRate); 
-            RegisterNewService(DeviceInformation); 
-            RegisterNewService(BatteryService); 
+        {
+            RegisterNewService(HeartRate);
+            RegisterNewService(DeviceInformation);
+            RegisterNewService(BatteryService);
         }
     }
 }

@@ -35,9 +35,28 @@ namespace Wwssi.Bluetooth
             _batteryParser = new BatteryLevelParser();
         }
 
-        public async Task<Schema.Device> Connect()
+        public async Task<List<Schema.Device>> GetAllDevices()
         {
-            _heartRateDevice = await BleHeartRate.FirstOrDefault();
+            var devices = await BleHeartRate.FindAll();
+
+            return devices.Select(a => new Schema.Device()
+            {
+                IsConnected = a.IsConnected,
+                Name = a.Name
+            }).ToList();
+        }
+
+        public async Task<Schema.Device> Connect (string deviceName)
+        {
+            if (string.IsNullOrEmpty(deviceName))
+            {
+                _heartRateDevice = await BleHeartRate.FirstOrDefault();
+            }
+            else
+            {
+                _heartRateDevice = await BleHeartRate.FindByName(deviceName);
+            }
+            
             if (_heartRateDevice == null)
             {
                 return new Schema.Device()
@@ -71,6 +90,11 @@ namespace Wwssi.Bluetooth
                 IsConnected = _heartRateDevice.IsConnected,
                 Name = _heartRateDevice.Name
             };
+        }
+
+        public async Task<Schema.Device> Connect()
+        {
+            return await Connect(string.Empty);
         }
 
         private void BleDeviceValueChanged(object sender, ValueChangedEventArgs<short> e)
