@@ -32,6 +32,24 @@ namespace MonitorUI
             _heartRateMonitor = new Wwssi.Bluetooth.HeartRateMonitor();
         }
 
+        protected async override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            var allDevices = await _heartRateMonitor.GetAllDevices();
+            DeviceComboBox.ItemsSource = allDevices;
+            DeviceComboBox.DisplayMemberPath = "Name";
+
+            // we should always monitor the connection status
+            _heartRateMonitor.ConnectionStatusChanged -= HrDeviceOnDeviceConnectionStatusChanged;
+            _heartRateMonitor.ConnectionStatusChanged += HrDeviceOnDeviceConnectionStatusChanged;
+
+            //// we can create value parser and listen for parsed values of given characteristic
+            //HrParser.ConnectWithCharacteristic(HrDevice.HeartRate.HeartRateMeasurement);
+            _heartRateMonitor.ValueChanged -= HrParserOnValueChanged;
+            _heartRateMonitor.ValueChanged += HrParserOnValueChanged;
+        }
+
         protected async override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
@@ -44,7 +62,14 @@ namespace MonitorUI
 
         private async void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
-            var device = await _heartRateMonitor.Connect();
+            var selectedItem = (Wwssi.Bluetooth.Schema.Device)DeviceComboBox.SelectedItem;
+            if (selectedItem == null)
+            {
+                MessageBox.Show("Must select a device to connect");
+                return;
+            }
+
+            var device = await _heartRateMonitor.Connect(selectedItem.Name);
 
             d("Button CONNECT clicked.");
             //HrDevice = await BleHeartRate.FirstOrDefault();
@@ -55,14 +80,14 @@ namespace MonitorUI
             }
 
             d("Found device: " + device.Name + " IsConnected=" + device.IsConnected);
-            // we should always monitor the connection status
-            _heartRateMonitor.ConnectionStatusChanged -= HrDeviceOnDeviceConnectionStatusChanged;
-            _heartRateMonitor.ConnectionStatusChanged += HrDeviceOnDeviceConnectionStatusChanged;
+            //// we should always monitor the connection status
+            //_heartRateMonitor.ConnectionStatusChanged -= HrDeviceOnDeviceConnectionStatusChanged;
+            //_heartRateMonitor.ConnectionStatusChanged += HrDeviceOnDeviceConnectionStatusChanged;
 
-            //// we can create value parser and listen for parsed values of given characteristic
-            //HrParser.ConnectWithCharacteristic(HrDevice.HeartRate.HeartRateMeasurement);
-            _heartRateMonitor.ValueChanged -= HrParserOnValueChanged;
-            _heartRateMonitor.ValueChanged += HrParserOnValueChanged;
+            ////// we can create value parser and listen for parsed values of given characteristic
+            ////HrParser.ConnectWithCharacteristic(HrDevice.HeartRate.HeartRateMeasurement);
+            //_heartRateMonitor.ValueChanged -= HrParserOnValueChanged;
+            //_heartRateMonitor.ValueChanged += HrParserOnValueChanged;
 
             //// connect also battery level parser to proper characteristic
             //BatteryParser.ConnectWithCharacteristic(HrDevice.BatteryService.BatteryLevel);
