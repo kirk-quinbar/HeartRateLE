@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wwssi.Bluetooth.Events
 {
-    public class ValueChangedEventArgs : EventArgs
+    public class RateChangedEventArgs : EventArgs
     {
         public int BeatsPerMinute { get; set; }
     }

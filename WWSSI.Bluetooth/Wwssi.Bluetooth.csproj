@@ -52,7 +52,7 @@
     <Compile Include="Base\BleService.cs" />
     <Compile Include="Base\BleValueParser.cs" />
     <Compile Include="Events\ConnectionStatusChangedEventArgs.cs" />
-    <Compile Include="Events\ValueChangedEventArgs.cs" />
+    <Compile Include="Events\RateChangedEventArgs.cs" />
     <Compile Include="HeartRateMonitor.cs" />
     <Compile Include="HeartRate\BleBatteryServiceService.cs" />
     <Compile Include="HeartRate\BleDeviceInformationService.cs" />

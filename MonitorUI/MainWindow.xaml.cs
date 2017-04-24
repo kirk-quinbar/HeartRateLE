@@ -46,8 +46,8 @@ namespace MonitorUI
 
             //// we can create value parser and listen for parsed values of given characteristic
             //HrParser.ConnectWithCharacteristic(HrDevice.HeartRate.HeartRateMeasurement);
-            _heartRateMonitor.ValueChanged -= HrParserOnValueChanged;
-            _heartRateMonitor.ValueChanged += HrParserOnValueChanged;
+            _heartRateMonitor.RateChanged -= HrParserOnValueChanged;
+            _heartRateMonitor.RateChanged += HrParserOnValueChanged;
         }
 
         protected async override void OnClosing(CancelEventArgs e)
@@ -105,7 +105,7 @@ namespace MonitorUI
         //    d("RAW value change event received:" + args.Value);
         //}
 
-        private async void HrParserOnValueChanged(object sender, ValueChangedEventArgs arg)
+        private async void HrParserOnValueChanged(object sender, RateChangedEventArgs arg)
         {
             await RunOnUiThread(() =>
             {
