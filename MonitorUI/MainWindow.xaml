@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid >
-        <StackPanel>
+        <StackPanel x:Name="TopStackPanel">
             <TextBlock x:Name="TxtStatus"
                        TextWrapping="Wrap"
                        Text="disconnected"
@@ -60,6 +60,14 @@
                     Width="100"
                     Margin="0,0,10,10"
                     Click="BtnReadInfo_Click"/>
+            <Button x:Name="PickDeviceButton"
+                    Content="Pick Device"
+                    IsEnabled="True"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Width="100"
+                    Margin="0,0,10,10"
+                    Click="PickDeviceButton_Click"/>
         </StackPanel>
 
     </Grid>

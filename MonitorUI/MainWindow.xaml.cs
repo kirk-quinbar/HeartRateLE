@@ -36,7 +36,7 @@ namespace MonitorUI
         {
             base.OnActivated(e);
 
-            var allDevices = await _heartRateMonitor.GetAllDevices();
+            var allDevices = await _heartRateMonitor.GetAllDevicesAsync();
             DeviceComboBox.ItemsSource = allDevices;
             DeviceComboBox.DisplayMemberPath = "Name";
 
@@ -53,7 +53,7 @@ namespace MonitorUI
         protected async override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
-            await _heartRateMonitor.Disconnect();
+            await _heartRateMonitor.DisconnectAsync();
         }
         //private async void CurrentOnSuspending(object sender, SuspendingEventArgs suspendingEventArgs)
         //{
@@ -69,7 +69,7 @@ namespace MonitorUI
                 return;
             }
 
-            var device = await _heartRateMonitor.Connect(selectedItem.Name);
+            var device = await _heartRateMonitor.ConnectAsync(selectedItem.Name);
 
             d("Button CONNECT clicked.");
             //HrDevice = await BleHeartRate.FirstOrDefault();
@@ -122,7 +122,7 @@ namespace MonitorUI
                 bool connected = args.IsConnected;
                 if (connected)
                 {
-                    var device = await _heartRateMonitor.GetDeviceInfo();
+                    var device = await _heartRateMonitor.GetDeviceInfoAsync();
                     TxtStatus.Text = device.Name + ": connected";
                     TxtBattery.Text = String.Format("battery level: {0}%", device.BatteryPercent);
                 }
@@ -142,21 +142,21 @@ namespace MonitorUI
         private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
             d("Button START clicked.");
-            await _heartRateMonitor.EnableNotifications();
+            await _heartRateMonitor.EnableNotificationsAsync();
             d("Notification enabled");
         }
 
         private async void BtnStop_Click(object sender, RoutedEventArgs e)
         {
             d("Button STOP clicked.");
-            await _heartRateMonitor.DisableNotifications();
+            await _heartRateMonitor.DisableNotificationsAsync();
             d("Notification disabled.");
             TxtHr.Text = "--";
         }
 
         private async void BtnReadInfo_Click(object sender, RoutedEventArgs e)
         {
-            var deviceInfo = await _heartRateMonitor.GetDeviceInfo();
+            var deviceInfo = await _heartRateMonitor.GetDeviceInfoAsync();
 
             //d("Reading DeviceInformation Characteristic ...");
             //var firmware = await HrDevice.DeviceInformation.FirmwareRevisionString.ReadAsString();
@@ -189,6 +189,16 @@ namespace MonitorUI
            {
                a();
            });
+        }
+
+        private async void PickDeviceButton_Click(object sender, RoutedEventArgs e)
+        {
+            //GeneralTransform ge = TopStackPanel.TransformToVisual(PickDeviceButton);
+            //Point point = ge.Transform(new Point(0,0));
+            //Rect rect = new Rect(point, new Point(point.X + PickDeviceButton.ActualWidth, point.Y + PickDeviceButton.ActualHeight));
+
+            Rect rect = new Rect(0, 0, 200, 200);
+            var device = await _heartRateMonitor.PickDevice(rect);
         }
 
         //private BleHeartRate HrDevice { get; set; }

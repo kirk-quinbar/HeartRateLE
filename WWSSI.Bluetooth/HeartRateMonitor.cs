@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Enumeration;
 using Wwssi.Bluetooth.Base;
 using Wwssi.Bluetooth.Events;
 using Wwssi.Bluetooth.HeartRate;
@@ -59,7 +60,7 @@ namespace Wwssi.Bluetooth
         /// Gets all paired BLE heart rate devices.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Schema.Device>> GetAllDevices()
+        public async Task<List<Schema.Device>> GetAllDevicesAsync()
         {
             var devices = await BleHeartRate.FindAll();
 
@@ -75,7 +76,7 @@ namespace Wwssi.Bluetooth
         /// </summary>
         /// <param name="deviceName">Name of the device.</param>
         /// <returns></returns>
-        public async Task<Schema.Device> Connect (string deviceName)
+        public async Task<Schema.Device> ConnectAsync(string deviceName)
         {
             if (string.IsNullOrEmpty(deviceName))
             {
@@ -85,7 +86,7 @@ namespace Wwssi.Bluetooth
             {
                 _heartRateDevice = await BleHeartRate.FindByName(deviceName);
             }
-            
+
             if (_heartRateDevice == null)
             {
                 return new Schema.Device()
@@ -124,9 +125,9 @@ namespace Wwssi.Bluetooth
         /// <summary>
         /// Connects the first BLE heart rate device.
         /// </summary>
-        public async Task<Schema.Device> Connect()
+        public async Task<Schema.Device> ConnectAsync()
         {
-            return await Connect(string.Empty);
+            return await ConnectAsync(string.Empty);
         }
 
         private void BleDeviceValueChanged(object sender, ValueChangedEventArgs<short> e)
@@ -152,7 +153,7 @@ namespace Wwssi.Bluetooth
         /// Disconnects the current BLE heart rate device.
         /// </summary>
         /// <returns></returns>
-        public async Task Disconnect()
+        public async Task DisconnectAsync()
         {
             if (_heartRateDevice != null) await _heartRateDevice.Close();
         }
@@ -161,7 +162,7 @@ namespace Wwssi.Bluetooth
         /// Enables the notifications for the current BLE heart rate device.
         /// </summary>
         /// <returns></returns>
-        public async Task EnableNotifications()
+        public async Task EnableNotificationsAsync()
         {
             await _heartRateParser.EnableNotifications();
         }
@@ -170,7 +171,7 @@ namespace Wwssi.Bluetooth
         /// Disables the notifications for the current BLE heart rate device.
         /// </summary>
         /// <returns></returns>
-        public async Task DisableNotifications()
+        public async Task DisableNotificationsAsync()
         {
             await _heartRateParser.DisableNotifications();
         }
@@ -179,7 +180,7 @@ namespace Wwssi.Bluetooth
         /// Gets the device information for the current BLE heart rate device.
         /// </summary>
         /// <returns></returns>
-        public async Task<Schema.DeviceInfo> GetDeviceInfo()
+        public async Task<Schema.DeviceInfo> GetDeviceInfoAsync()
         {
             byte battery = await _batteryParser.Read();
 

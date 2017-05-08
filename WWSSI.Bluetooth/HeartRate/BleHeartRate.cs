@@ -54,6 +54,7 @@ namespace Wwssi.Bluetooth.HeartRate
             List<BleHeartRate> result = new List<BleHeartRate>();
             // get all BT LE devices
             var all = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(BluetoothLEDevice.GetDeviceSelector());
+            //var all = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync();
             GattDeviceService service = null;
             BluetoothLEDevice leDevice = null;
 
