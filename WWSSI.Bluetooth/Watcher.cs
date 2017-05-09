@@ -56,12 +56,36 @@ namespace Wwssi.Bluetooth
             DeviceRemoved?.Invoke(this, e);
         }
 
+        public event EventHandler<object> DeviceEnumerationCompleted;
+        protected virtual void OnDeviceEnumerationCompleted(object obj)
+        {
+            DeviceEnumerationCompleted?.Invoke(this, obj);
+        }
+
+        public event EventHandler<object> DeviceStopped;
+        protected virtual void OnDeviceStopped(object obj)
+        {
+            DeviceStopped?.Invoke(this, obj);
+        }
+
         public Watcher()
         {
             _deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLE.Selector);
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
             _deviceWatcher.Removed +=Removed;
+            _deviceWatcher.EnumerationCompleted += EnumerationCompleted;
+            _deviceWatcher.Stopped += Stopped;
+        }
+
+        private void Stopped(DeviceWatcher watcher, object obj)
+        {
+            OnDeviceStopped(obj);
+        }
+
+        private void EnumerationCompleted(DeviceWatcher watcher, object obj)
+        {
+            OnDeviceEnumerationCompleted(obj);
         }
 
         private void Added(DeviceWatcher watcher, DeviceInformation deviceInformation)
