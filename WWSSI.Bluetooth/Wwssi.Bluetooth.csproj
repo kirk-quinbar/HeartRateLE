@@ -53,18 +53,24 @@
     <Compile Include="Base\BleService.cs" />
     <Compile Include="Base\BleValueParser.cs" />
     <Compile Include="Events\ConnectionStatusChangedEventArgs.cs" />
+    <Compile Include="Events\DeviceRemovedEventArgs.cs" />
+    <Compile Include="Events\DeviceUpdatedEventArgs.cs" />
+    <Compile Include="Events\DeviceAddedEventArgs.cs" />
     <Compile Include="Events\RateChangedEventArgs.cs" />
     <Compile Include="HeartRateMonitor.cs" />
     <Compile Include="HeartRate\BleBatteryServiceService.cs" />
     <Compile Include="HeartRate\BleDeviceInformationService.cs" />
     <Compile Include="HeartRate\BleHeartRate.cs" />
     <Compile Include="HeartRate\BleHeartRateService.cs" />
+    <Compile Include="PairingHelper.cs" />
     <Compile Include="Parsers\BatteryLevelParser.cs" />
     <Compile Include="Parsers\HeartRateMeasurementParser.cs" />
     <Compile Include="Parsers\StringParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Schema\Device.cs" />
-    <Compile Include="Schema\DeviceInfo.cs" />
+    <Compile Include="Schema\HeartRateDevice.cs" />
+    <Compile Include="Schema\HeartRateDeviceInfo.cs" />
+    <Compile Include="Schema\DeviceSelectorInfo.cs" />
+    <Compile Include="Watcher.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Wwssi.Bluetooth.Schema
 {
-    public class DeviceInfo
+    public class HeartRateDeviceInfo
     {
         public string Name { get; set; }
         public string Firmware { get; set; }

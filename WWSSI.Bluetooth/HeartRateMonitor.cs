@@ -60,11 +60,11 @@ namespace Wwssi.Bluetooth
         /// Gets all paired BLE heart rate devices.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Schema.Device>> GetAllDevicesAsync()
+        public async Task<List<Schema.HeartRateDevice>> GetAllDevicesAsync()
         {
             var devices = await BleHeartRate.FindAll();
 
-            return devices.Select(a => new Schema.Device()
+            return devices.Select(a => new Schema.HeartRateDevice()
             {
                 IsConnected = a.IsConnected,
                 Name = a.Name
@@ -76,7 +76,7 @@ namespace Wwssi.Bluetooth
         /// </summary>
         /// <param name="deviceName">Name of the device.</param>
         /// <returns></returns>
-        public async Task<Schema.Device> ConnectAsync(string deviceName)
+        public async Task<Schema.HeartRateDevice> ConnectAsync(string deviceName)
         {
             if (string.IsNullOrEmpty(deviceName))
             {
@@ -89,7 +89,7 @@ namespace Wwssi.Bluetooth
 
             if (_heartRateDevice == null)
             {
-                return new Schema.Device()
+                return new Schema.HeartRateDevice()
                 {
                     IsConnected = false,
                     ErrorMessage = "Could not find any heart rate device"
@@ -115,7 +115,7 @@ namespace Wwssi.Bluetooth
             // we could force propagation of event with connection status change, to run the callback for initial status
             _heartRateDevice.NotifyConnectionStatus();
 
-            return new Schema.Device()
+            return new Schema.HeartRateDevice()
             {
                 IsConnected = _heartRateDevice.IsConnected,
                 Name = _heartRateDevice.Name
@@ -125,7 +125,7 @@ namespace Wwssi.Bluetooth
         /// <summary>
         /// Connects the first BLE heart rate device.
         /// </summary>
-        public async Task<Schema.Device> ConnectAsync()
+        public async Task<Schema.HeartRateDevice> ConnectAsync()
         {
             return await ConnectAsync(string.Empty);
         }
@@ -180,11 +180,11 @@ namespace Wwssi.Bluetooth
         /// Gets the device information for the current BLE heart rate device.
         /// </summary>
         /// <returns></returns>
-        public async Task<Schema.DeviceInfo> GetDeviceInfoAsync()
+        public async Task<Schema.HeartRateDeviceInfo> GetDeviceInfoAsync()
         {
             byte battery = await _batteryParser.Read();
 
-            return new Schema.DeviceInfo()
+            return new Schema.HeartRateDeviceInfo()
             {
                 Name = _heartRateDevice.Name,
                 Firmware = await _heartRateDevice.DeviceInformation.FirmwareRevisionString.ReadAsString(),

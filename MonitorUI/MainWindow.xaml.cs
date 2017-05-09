@@ -62,7 +62,7 @@ namespace MonitorUI
 
         private async void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
-            var selectedItem = (Wwssi.Bluetooth.Schema.Device)DeviceComboBox.SelectedItem;
+            var selectedItem = (Wwssi.Bluetooth.Schema.HeartRateDevice)DeviceComboBox.SelectedItem;
             if (selectedItem == null)
             {
                 MessageBox.Show("Must select a device to connect");
@@ -197,8 +197,8 @@ namespace MonitorUI
             //Point point = ge.Transform(new Point(0,0));
             //Rect rect = new Rect(point, new Point(point.X + PickDeviceButton.ActualWidth, point.Y + PickDeviceButton.ActualHeight));
 
-            Rect rect = new Rect(0, 0, 200, 200);
-            var device = await _heartRateMonitor.PickDevice(rect);
+            //Rect rect = new Rect(0, 0, 200, 200);
+            //var device = await _heartRateMonitor.PickDevice(rect);
         }
 
         //private BleHeartRate HrDevice { get; set; }
