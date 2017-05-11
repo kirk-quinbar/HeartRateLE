@@ -70,6 +70,7 @@
     <Compile Include="Schema\HeartRateDevice.cs" />
     <Compile Include="Schema\HeartRateDeviceInfo.cs" />
     <Compile Include="Schema\DeviceSelectorInfo.cs" />
+    <Compile Include="Schema\WatcherDevice.cs" />
     <Compile Include="Watcher.cs" />
   </ItemGroup>
   <ItemGroup />

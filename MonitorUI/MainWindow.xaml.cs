@@ -191,8 +191,10 @@ namespace MonitorUI
            });
         }
 
-        private async void PickDeviceButton_Click(object sender, RoutedEventArgs e)
+        private void PickDeviceButton_Click(object sender, RoutedEventArgs e)
         {
+            var deviceWatcher = new DeviceWatcher();
+            var result = deviceWatcher.ShowDialog();
             //GeneralTransform ge = TopStackPanel.TransformToVisual(PickDeviceButton);
             //Point point = ge.Transform(new Point(0,0));
             //Rect rect = new Rect(point, new Point(point.X + PickDeviceButton.ActualWidth, point.Y + PickDeviceButton.ActualHeight));

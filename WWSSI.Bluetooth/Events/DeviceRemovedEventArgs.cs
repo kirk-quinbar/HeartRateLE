@@ -8,8 +8,6 @@ namespace Wwssi.Bluetooth.Events
 {
     public class DeviceRemovedEventArgs
     {
-        public string Id { get; set; }
-        public string Kind { get; set; }
-        public Dictionary<string,object> Properties { get; set; }
+        public Schema.WatcherDevice Device { get; set; }
     }
 }

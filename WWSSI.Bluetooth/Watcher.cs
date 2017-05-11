@@ -62,10 +62,10 @@ namespace Wwssi.Bluetooth
             DeviceEnumerationCompleted?.Invoke(this, obj);
         }
 
-        public event EventHandler<object> DeviceStopped;
-        protected virtual void OnDeviceStopped(object obj)
+        public event EventHandler<object> DeviceEnumerationStopped;
+        protected virtual void OnDeviceEnumerationStopped(object obj)
         {
-            DeviceStopped?.Invoke(this, obj);
+            DeviceEnumerationStopped?.Invoke(this, obj);
         }
 
         public Watcher()
@@ -73,14 +73,14 @@ namespace Wwssi.Bluetooth
             _deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLE.Selector);
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
-            _deviceWatcher.Removed +=Removed;
+            _deviceWatcher.Removed += Removed;
             _deviceWatcher.EnumerationCompleted += EnumerationCompleted;
             _deviceWatcher.Stopped += Stopped;
         }
 
         private void Stopped(DeviceWatcher watcher, object obj)
         {
-            OnDeviceStopped(obj);
+            OnDeviceEnumerationStopped(obj);
         }
 
         private void EnumerationCompleted(DeviceWatcher watcher, object obj)
@@ -92,12 +92,16 @@ namespace Wwssi.Bluetooth
         {
             var args = new Events.DeviceAddedEventArgs()
             {
-                Id = deviceInformation.Id,
-                IsDefault = deviceInformation.IsDefault,
-                IsEnabled = deviceInformation.IsEnabled,
-                Name = deviceInformation.Name,
-                IsPaired = deviceInformation.Pairing.IsPaired,
-                Kind = deviceInformation.Kind.ToString()
+                Device = new Schema.WatcherDevice()
+                {
+                    Id = deviceInformation.Id,
+                    IsDefault = deviceInformation.IsDefault,
+                    IsEnabled = deviceInformation.IsEnabled,
+                    Name = deviceInformation.Name,
+                    IsPaired = deviceInformation.Pairing.IsPaired,
+                    Kind = deviceInformation.Kind.ToString(),
+                    Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                }
             };
 
             OnDeviceAdded(args);
@@ -105,11 +109,14 @@ namespace Wwssi.Bluetooth
 
         private void Updated(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
         {
-            
             var args = new Events.DeviceUpdatedEventArgs()
             {
-                Id = deviceInformationUpdate.Id,
-                Kind = deviceInformationUpdate.Kind.ToString()
+                Device = new Schema.WatcherDevice()
+                {
+                    Id = deviceInformationUpdate.Id,
+                    Kind = deviceInformationUpdate.Kind.ToString(),
+                    Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                }
             };
 
             OnDeviceUpdated(args);
@@ -117,11 +124,14 @@ namespace Wwssi.Bluetooth
 
         private void Removed(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
         {
-
             var args = new Events.DeviceRemovedEventArgs()
             {
-                Id = deviceInformationUpdate.Id,
-                Kind = deviceInformationUpdate.Kind.ToString()
+                Device=new Schema.WatcherDevice()
+                {
+                    Id = deviceInformationUpdate.Id,
+                    Kind = deviceInformationUpdate.Kind.ToString(),
+                    Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                }
             };
 
             OnDeviceRemoved(args);
@@ -134,7 +144,10 @@ namespace Wwssi.Bluetooth
 
         public void Stop()
         {
-            _deviceWatcher.Stop();
+            if (_deviceWatcher.Status == DeviceWatcherStatus.Started || _deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
+            {
+                _deviceWatcher.Stop();
+            }
         }
 
     }
