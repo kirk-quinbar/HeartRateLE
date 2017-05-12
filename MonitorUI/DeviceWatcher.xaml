@@ -19,10 +19,10 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*" MinWidth="100"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top">
+                <!--<Border Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top">
                     <Image Source="{Binding Path=GlyphBitmapImage}"
                            Stretch="UniformToFill"/>
-                </Border>
+                </Border>-->
                 <Border Grid.Column="1" Margin="5">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">

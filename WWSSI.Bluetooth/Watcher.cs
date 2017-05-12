@@ -70,7 +70,7 @@ namespace Wwssi.Bluetooth
 
         public Watcher()
         {
-            _deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLE.Selector);
+            _deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLEUnpairedOnly.Selector);
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
             _deviceWatcher.Removed += Removed;

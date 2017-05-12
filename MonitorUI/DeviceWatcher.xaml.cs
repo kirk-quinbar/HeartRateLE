@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Wwssi.Bluetooth.Schema;
 
 namespace MonitorUI
 {
@@ -20,7 +23,7 @@ namespace MonitorUI
     /// </summary>
     public partial class DeviceWatcher : Window
     {
-        public ObservableCollection<Object> ResultCollection
+        public ObservableCollection<WatcherDevice> ResultCollection
         {
             get;
             private set;
@@ -31,11 +34,9 @@ namespace MonitorUI
         public DeviceWatcher()
         {
             InitializeComponent();
-        }
 
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
+            ResultCollection = new ObservableCollection<WatcherDevice>();
+            this.DataContext = this;
 
             _deviceWatcher = new Wwssi.Bluetooth.Watcher();
             _deviceWatcher.DeviceAdded += OnDeviceAdded;
@@ -45,34 +46,49 @@ namespace MonitorUI
             _deviceWatcher.DeviceEnumerationCompleted += OnDeviceEnumerationCompleted;
         }
 
-        private void OnDeviceEnumerationCompleted(object sender, object e)
+        protected override void OnActivated(EventArgs e)
         {
-            
+            base.OnActivated(e);
         }
 
-        private void OnDeviceEnumerationStopped(object sender, object e)
+        private async void OnDeviceEnumerationCompleted(object sender, object e)
         {
-            
+            Debug.WriteLine("Device Enumeration Completed");
         }
 
-        private void OnDeviceUpdated(object sender, Wwssi.Bluetooth.Events.DeviceUpdatedEventArgs e)
+        private async void OnDeviceEnumerationStopped(object sender, object e)
         {
-            
+            Debug.WriteLine("Device Enumeration Stopped");
         }
 
-        private void OnDeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
+        private async void OnDeviceUpdated(object sender, Wwssi.Bluetooth.Events.DeviceUpdatedEventArgs e)
         {
-            
+            Debug.WriteLine("Device Updated");
         }
 
-        private void OnDeviceAdded(object sender, Wwssi.Bluetooth.Events.DeviceAddedEventArgs e)
+        private async void OnDeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
         {
-            
+            await RunOnUiThread(() =>
+            {
+                var foundItem = ResultCollection.FirstOrDefault(a => a.Id == e.Device.Id);
+                if (foundItem != null)
+                    ResultCollection.Remove(foundItem);
+                Debug.WriteLine("Device Removed: " + e.Device.Id);
+            });
         }
 
-        protected override void OnDeactivated(EventArgs e)
+        private async void OnDeviceAdded(object sender, Wwssi.Bluetooth.Events.DeviceAddedEventArgs e)
         {
-            base.OnDeactivated(e);
+            await RunOnUiThread(() =>
+            {
+                ResultCollection.Add(e.Device);
+                Debug.WriteLine("Device Added: " + e.Device.Id);
+            });
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
             StopWatcher();
         }
 
@@ -103,5 +119,14 @@ namespace MonitorUI
 
             startWatcherButton.IsEnabled = true;
         }
+
+        private async Task RunOnUiThread(Action a)
+        {
+            await this.Dispatcher.InvokeAsync(() =>
+            {
+                a();
+            });
+        }
+
     }
 }

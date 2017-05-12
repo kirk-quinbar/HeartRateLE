@@ -24,6 +24,14 @@
                        HorizontalAlignment="Center"
                        Margin="0,40"
                        FontSize="106.667"/>
+            <Button x:Name="PairDeviceButton"
+                    Content="Pair Device"
+                    IsEnabled="True"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    Width="100"
+                    Margin="0,0,10,10"
+                    Click="PairDeviceButton_Click"/>
             <ComboBox x:Name="DeviceComboBox"
                       HorizontalAlignment="Right"
                       VerticalAlignment="Stretch"
@@ -60,14 +68,6 @@
                     Width="100"
                     Margin="0,0,10,10"
                     Click="BtnReadInfo_Click"/>
-            <Button x:Name="PickDeviceButton"
-                    Content="Pick Device"
-                    IsEnabled="True"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Stretch"
-                    Width="100"
-                    Margin="0,0,10,10"
-                    Click="PickDeviceButton_Click"/>
         </StackPanel>
 
     </Grid>
