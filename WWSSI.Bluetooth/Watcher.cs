@@ -36,6 +36,8 @@ namespace Wwssi.Bluetooth
             }
         }
 
+        protected List<DeviceInformation> _devices;
+
         private DeviceWatcher _deviceWatcher;
 
         public event EventHandler<Events.DeviceAddedEventArgs> DeviceAdded;
@@ -70,6 +72,7 @@ namespace Wwssi.Bluetooth
 
         public Watcher()
         {
+            _devices = new List<DeviceInformation>();
             _deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLEUnpairedOnly.Selector);
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
@@ -103,6 +106,7 @@ namespace Wwssi.Bluetooth
                     Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
                 }
             };
+            _devices.Add(deviceInformation);
 
             OnDeviceAdded(args);
         }
@@ -119,6 +123,7 @@ namespace Wwssi.Bluetooth
                 }
             };
 
+
             OnDeviceUpdated(args);
         }
 
@@ -126,13 +131,17 @@ namespace Wwssi.Bluetooth
         {
             var args = new Events.DeviceRemovedEventArgs()
             {
-                Device=new Schema.WatcherDevice()
+                Device = new Schema.WatcherDevice()
                 {
                     Id = deviceInformationUpdate.Id,
                     Kind = deviceInformationUpdate.Kind.ToString(),
                     Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
                 }
             };
+
+            var foundItem = _devices.FirstOrDefault(a => a.Id == deviceInformationUpdate.Id);
+            if (foundItem != null)
+                _devices.Remove(foundItem);
 
             OnDeviceRemoved(args);
         }
@@ -147,6 +156,16 @@ namespace Wwssi.Bluetooth
             if (_deviceWatcher.Status == DeviceWatcherStatus.Started || _deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
             {
                 _deviceWatcher.Stop();
+            }
+        }
+
+        public async Task PairDevice(string Id)
+        {
+            var foundItem = _devices.FirstOrDefault(a => a.Id == Id);
+            if (foundItem != null)
+            {
+                DevicePairingResult dpr = await foundItem.Pairing.PairAsync();
+
             }
         }
 

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonitorUI"
         mc:Ignorable="d"
-        Title="DeviceWatcher" Height="400" Width="400">
+        Title="DeviceWatcher" Height="400" Width="600">
 
     <Window.Resources>
 
@@ -39,7 +39,7 @@
         </DataTemplate>
 
     </Window.Resources>
-    
+
     <Grid x:Name="RootGrid" Margin="12,20,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -48,9 +48,9 @@
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" >
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,15,0">
 
-                <TextBlock Text="Description:"  />
+                <TextBlock Text="Manage Bluetooth deivces" FontWeight="Bold" />
                 <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" 
-                               Text="This scenario demonstrates the use of the Windows.Devices.Enumeration DeviceWatcher. Device Watcher allows you to find and recieve updates for devices that you care about" />
+                               Text="Your PC is searching for and can be discovered by Bluetooth devices." />
 
                 <!--<TextBlock Margin="0,0,0,2" Text="Choose a device selector:" />
                 <ComboBox x:Name="selectorComboBox" 
@@ -59,27 +59,26 @@
                               ItemTemplate="{StaticResource ComboBoxItemTemplate}"
                               ItemsSource="{Binding}" />-->
 
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="startWatcherButton"
-                                Margin="0,0,5,10"
-                                Click="StartWatcherButton_Click">
-                        Start Watcher
-                    </Button>
-
-                    <Button x:Name="stopWatcherButton"
-                                Margin="0,0,5,10"
-                                IsEnabled="False"
-                                Click="StopWatcherButton_Click">
-                        Stop Watcher
-                    </Button>
-                </StackPanel>
-
-                <Border BorderBrush="AntiqueWhite" BorderThickness="1" Height="200">
-                    <ListView x:Name="resultsListView"
+                <Border BorderBrush="AntiqueWhite" BorderThickness="1" Width="Auto">
+                    <StackPanel Orientation="Vertical">
+                        <Label Content="Paired devices:" ></Label>
+                        <ListView x:Name="pairedListView"
                                   ItemTemplate="{StaticResource ResultsListViewTemplate}"
-                                  ItemsSource="{Binding Path=ResultCollection}">
-                    </ListView>
+                                  ItemsSource="{Binding Path=pairedCollection}" Height="100" Width="Auto">
+                        </ListView>
+                    </StackPanel>
                 </Border>
+
+                <Border BorderBrush="AntiqueWhite" BorderThickness="1" Width="Auto">
+                    <StackPanel Orientation="Vertical">
+                        <Label Content="Unpaired devices:" ></Label>
+                        <ListView x:Name="unpairedListView"
+                                  ItemTemplate="{StaticResource ResultsListViewTemplate}"
+                                  ItemsSource="{Binding Path=UnpairedCollection}" Height="100" Width="Auto">
+                        </ListView>
+                    </StackPanel>
+                </Border>
+                <Button x:Name="PairDeviceButton" Content="Pair" Click="PairDeviceButton_Click"/>
             </StackPanel>
         </ScrollViewer>
 

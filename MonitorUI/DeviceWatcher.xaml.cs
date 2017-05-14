@@ -23,7 +23,13 @@ namespace MonitorUI
     /// </summary>
     public partial class DeviceWatcher : Window
     {
-        public ObservableCollection<WatcherDevice> ResultCollection
+        public ObservableCollection<WatcherDevice> UnpairedCollection
+        {
+            get;
+            private set;
+        }
+
+        public ObservableCollection<WatcherDevice> PairedCollection
         {
             get;
             private set;
@@ -35,7 +41,8 @@ namespace MonitorUI
         {
             InitializeComponent();
 
-            ResultCollection = new ObservableCollection<WatcherDevice>();
+            UnpairedCollection = new ObservableCollection<WatcherDevice>();
+            PairedCollection = new ObservableCollection<WatcherDevice>();
             this.DataContext = this;
 
             _deviceWatcher = new Wwssi.Bluetooth.Watcher();
@@ -44,6 +51,7 @@ namespace MonitorUI
             _deviceWatcher.DeviceUpdated += OnDeviceUpdated;
             _deviceWatcher.DeviceEnumerationStopped += OnDeviceEnumerationStopped;
             _deviceWatcher.DeviceEnumerationCompleted += OnDeviceEnumerationCompleted;
+            StartWatcher();
         }
 
         protected override void OnActivated(EventArgs e)
@@ -70,9 +78,9 @@ namespace MonitorUI
         {
             await RunOnUiThread(() =>
             {
-                var foundItem = ResultCollection.FirstOrDefault(a => a.Id == e.Device.Id);
+                var foundItem = UnpairedCollection.FirstOrDefault(a => a.Id == e.Device.Id);
                 if (foundItem != null)
-                    ResultCollection.Remove(foundItem);
+                    UnpairedCollection.Remove(foundItem);
                 Debug.WriteLine("Device Removed: " + e.Device.Id);
             });
         }
@@ -81,7 +89,7 @@ namespace MonitorUI
         {
             await RunOnUiThread(() =>
             {
-                ResultCollection.Add(e.Device);
+                UnpairedCollection.Add(e.Device);
                 Debug.WriteLine("Device Added: " + e.Device.Id);
             });
         }
@@ -104,20 +112,20 @@ namespace MonitorUI
 
         private void StartWatcher()
         {
-            startWatcherButton.IsEnabled = false;
+            //startWatcherButton.IsEnabled = false;
 
             _deviceWatcher.Start();
 
-            stopWatcherButton.IsEnabled = true;
+            //stopWatcherButton.IsEnabled = true;
         }
 
         private void StopWatcher()
         {
-            stopWatcherButton.IsEnabled = false;
+            //stopWatcherButton.IsEnabled = false;
 
             _deviceWatcher.Stop();
 
-            startWatcherButton.IsEnabled = true;
+            //startWatcherButton.IsEnabled = true;
         }
 
         private async Task RunOnUiThread(Action a)
@@ -128,5 +136,13 @@ namespace MonitorUI
             });
         }
 
+        private async void PairDeviceButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (WatcherDevice)unpairedListView.SelectedItem;
+            if (selectedItem != null)
+                await _deviceWatcher.PairDevice(selectedItem.Id);
+
+            this.Close();
+        }
     }
 }
