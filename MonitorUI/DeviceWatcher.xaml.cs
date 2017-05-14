@@ -140,7 +140,10 @@ namespace MonitorUI
         {
             var selectedItem = (WatcherDevice)unpairedListView.SelectedItem;
             if (selectedItem != null)
-                await _deviceWatcher.PairDevice(selectedItem.Id);
+            {
+                var result = await _deviceWatcher.PairDevice(selectedItem.Id);
+                MessageBox.Show(result.Status);
+            }
 
             this.Close();
         }

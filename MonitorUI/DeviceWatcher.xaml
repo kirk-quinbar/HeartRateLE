@@ -64,7 +64,7 @@
                         <Label Content="Paired devices:" ></Label>
                         <ListView x:Name="pairedListView"
                                   ItemTemplate="{StaticResource ResultsListViewTemplate}"
-                                  ItemsSource="{Binding Path=pairedCollection}" Height="100" Width="Auto">
+                                  ItemsSource="{Binding Path=PairedCollection}" Height="100" Width="Auto">
                         </ListView>
                     </StackPanel>
                 </Border>

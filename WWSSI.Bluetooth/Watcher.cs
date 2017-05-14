@@ -159,15 +159,53 @@ namespace Wwssi.Bluetooth
             }
         }
 
-        public async Task PairDevice(string Id)
+        public async Task<Schema.PairingResult> PairDevice(string Id)
         {
             var foundItem = _devices.FirstOrDefault(a => a.Id == Id);
             if (foundItem != null)
             {
-                DevicePairingResult dpr = await foundItem.Pairing.PairAsync();
+                foundItem.Pairing.Custom.PairingRequested += Custom_PairingRequested;
+                var result = await foundItem.Pairing.Custom.PairAsync(DevicePairingKinds.ConfirmOnly);
 
+                return new Schema.PairingResult()
+                {
+                    Status = result.Status.ToString()
+                };
+            }
+            else
+            {
+                return new Schema.PairingResult()
+                {
+                    Status = string.Format("Device Id:{0} not found", Id)
+                };
             }
         }
 
+        private void Custom_PairingRequested(DeviceInformationCustomPairing sender, DevicePairingRequestedEventArgs args)
+        {
+            args.Accept();
+            //throw new NotImplementedException();
+        }
+
+        public async Task<Schema.PairingResult> UnpairDevice(string Id)
+        {
+            var foundItem = _devices.FirstOrDefault(a => a.Id == Id);
+            if (foundItem != null)
+            {
+                var result = await foundItem.Pairing.UnpairAsync();
+                return new Schema.PairingResult()
+                {
+                    Status = result.Status.ToString()
+                };
+            }
+            else
+            {
+                return new Schema.PairingResult()
+                {
+                    Status = string.Format("Device Id:{0} not found", Id)
+                };
+            }
+        }
     }
 }
+
