@@ -36,8 +36,7 @@ namespace Wwssi.Bluetooth
             }
         }
 
-        protected List<DeviceInformation> _devices;
-
+        private List<DeviceInformation> _devices;
         private DeviceWatcher _deviceWatcher;
 
         public event EventHandler<Events.DeviceAddedEventArgs> DeviceAdded;

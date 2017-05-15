@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonitorUI"
         mc:Ignorable="d"
-        Title="DeviceWatcher" Height="500" Width="600">
+        Title="DeviceWatcher" Height="500" Width="600" HorizontalAlignment="Center" VerticalAlignment="Center">
 
     <Window.Resources>
 

@@ -29,14 +29,7 @@ namespace MonitorUI
         {
             InitializeComponent();
             _heartRateMonitor = new Wwssi.Bluetooth.HeartRateMonitor();
-        }
 
-        protected async override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-
-            var allDevices = await _heartRateMonitor.GetAllDevicesAsync();
-            DeviceComboBox.ItemsSource = allDevices;
             DeviceComboBox.DisplayMemberPath = "Name";
 
             // we should always monitor the connection status
@@ -47,6 +40,17 @@ namespace MonitorUI
             //HrParser.ConnectWithCharacteristic(HrDevice.HeartRate.HeartRateMeasurement);
             _heartRateMonitor.RateChanged -= HrParserOnValueChanged;
             _heartRateMonitor.RateChanged += HrParserOnValueChanged;
+        }
+
+        
+        protected async override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+
+            var allDevices = await _heartRateMonitor.GetAllDevicesAsync();
+            DeviceComboBox.ItemsSource = allDevices;
+
+            Debug.WriteLine("OnActivated");
         }
 
         protected async override void OnClosing(CancelEventArgs e)
