@@ -35,7 +35,7 @@ namespace MonitorUI
             private set;
         }
 
-        private Wwssi.Bluetooth.Watcher _deviceWatcher;
+        private Wwssi.Bluetooth.Watcher _unpairedWatcher;
 
         public DeviceWatcher()
         {
@@ -45,13 +45,13 @@ namespace MonitorUI
             PairedCollection = new ObservableCollection<WatcherDevice>();
             this.DataContext = this;
 
-            _deviceWatcher = new Wwssi.Bluetooth.Watcher();
-            _deviceWatcher.DeviceAdded += OnDeviceAdded;
-            _deviceWatcher.DeviceRemoved += OnDeviceRemoved;
-            _deviceWatcher.DeviceUpdated += OnDeviceUpdated;
-            _deviceWatcher.DeviceEnumerationStopped += OnDeviceEnumerationStopped;
-            _deviceWatcher.DeviceEnumerationCompleted += OnDeviceEnumerationCompleted;
-            StartWatcher();
+            _unpairedWatcher = new Wwssi.Bluetooth.Watcher(DeviceSelector.BluetoothLeUnpairedOnly);
+            _unpairedWatcher.DeviceAdded += OnDeviceAdded;
+            _unpairedWatcher.DeviceRemoved += OnDeviceRemoved;
+            _unpairedWatcher.DeviceUpdated += OnDeviceUpdated;
+            _unpairedWatcher.DeviceEnumerationStopped += OnDeviceEnumerationStopped;
+            _unpairedWatcher.DeviceEnumerationCompleted += OnDeviceEnumerationCompleted;
+            _unpairedWatcher.Start();
         }
 
         protected override void OnActivated(EventArgs e)
@@ -97,35 +97,7 @@ namespace MonitorUI
         protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
-            StopWatcher();
-        }
-
-        private void StartWatcherButton_Click(object sender, RoutedEventArgs e)
-        {
-            StartWatcher();
-        }
-
-        private void StopWatcherButton_Click(object sender, RoutedEventArgs e)
-        {
-            StopWatcher();
-        }
-
-        private void StartWatcher()
-        {
-            //startWatcherButton.IsEnabled = false;
-
-            _deviceWatcher.Start();
-
-            //stopWatcherButton.IsEnabled = true;
-        }
-
-        private void StopWatcher()
-        {
-            //stopWatcherButton.IsEnabled = false;
-
-            _deviceWatcher.Stop();
-
-            //startWatcherButton.IsEnabled = true;
+            _unpairedWatcher.Stop();
         }
 
         private async Task RunOnUiThread(Action a)
@@ -141,7 +113,7 @@ namespace MonitorUI
             var selectedItem = (WatcherDevice)unpairedListView.SelectedItem;
             if (selectedItem != null)
             {
-                var result = await _deviceWatcher.PairDevice(selectedItem.Id);
+                var result = await _unpairedWatcher.PairDevice(selectedItem.Id);
                 MessageBox.Show(result.Status);
             }
 

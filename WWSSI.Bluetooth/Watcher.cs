@@ -70,15 +70,30 @@ namespace Wwssi.Bluetooth
             DeviceEnumerationStopped?.Invoke(this, obj);
         }
 
-        public Watcher()
+        public Watcher(Schema.DeviceSelector deviceSelector)
         {
             _devices = new List<DeviceInformation>();
-            _deviceWatcher = DeviceInformation.CreateWatcher(BluetoothLEUnpairedOnly.Selector);
+            _deviceWatcher = DeviceInformation.CreateWatcher(GetSelector(deviceSelector));
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
             _deviceWatcher.Removed += Removed;
             _deviceWatcher.EnumerationCompleted += EnumerationCompleted;
             _deviceWatcher.Stopped += Stopped;
+        }
+
+        private string GetSelector(Schema.DeviceSelector deviceSelector)
+        {
+            switch (deviceSelector)
+            {
+                case Schema.DeviceSelector.BluetoothLe:
+                    return BluetoothLE.Selector;
+                case Schema.DeviceSelector.BluetoothLePairedOnly:
+                    return BluetoothLEPairedOnly.Selector;
+                case Schema.DeviceSelector.BluetoothLeUnpairedOnly:
+                    return BluetoothLEUnpairedOnly.Selector;
+                default:
+                    return BluetoothLE.Selector;
+            }
         }
 
         private void Stopped(DeviceWatcher watcher, object obj)

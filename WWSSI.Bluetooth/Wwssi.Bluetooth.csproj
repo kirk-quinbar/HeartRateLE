@@ -68,6 +68,7 @@
     <Compile Include="Parsers\StringParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Schema\DevicePairingResult.cs" />
+    <Compile Include="Schema\DeviceSelector.cs" />
     <Compile Include="Schema\HeartRateDevice.cs" />
     <Compile Include="Schema\HeartRateDeviceInfo.cs" />
     <Compile Include="Schema\DeviceSelectorInfo.cs" />
