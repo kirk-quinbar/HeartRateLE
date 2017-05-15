@@ -36,6 +36,7 @@ namespace MonitorUI
         }
 
         private Wwssi.Bluetooth.Watcher _unpairedWatcher;
+        private Wwssi.Bluetooth.Watcher _pairedWatcher;
 
         public DeviceWatcher()
         {
@@ -48,30 +49,38 @@ namespace MonitorUI
             _unpairedWatcher = new Wwssi.Bluetooth.Watcher(DeviceSelector.BluetoothLeUnpairedOnly);
             _unpairedWatcher.DeviceAdded += OnDeviceAdded;
             _unpairedWatcher.DeviceRemoved += OnDeviceRemoved;
-            _unpairedWatcher.DeviceUpdated += OnDeviceUpdated;
-            _unpairedWatcher.DeviceEnumerationStopped += OnDeviceEnumerationStopped;
-            _unpairedWatcher.DeviceEnumerationCompleted += OnDeviceEnumerationCompleted;
             _unpairedWatcher.Start();
+
+            _pairedWatcher = new Wwssi.Bluetooth.Watcher(DeviceSelector.BluetoothLePairedOnly);
+            _pairedWatcher.DeviceAdded += OnPaired_DeviceAdded;
+            _pairedWatcher.DeviceRemoved += OnPaired_DeviceRemoved;
+
+            _pairedWatcher.Start();
+        }
+
+        private async void OnPaired_DeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
+        {
+            await RunOnUiThread(() =>
+            {
+                var foundItem = PairedCollection.FirstOrDefault(a => a.Id == e.Device.Id);
+                if (foundItem != null)
+                    PairedCollection.Remove(foundItem);
+                Debug.WriteLine("Paired device Removed: " + e.Device.Id);
+            });
+        }
+
+        private async void OnPaired_DeviceAdded(object sender, Wwssi.Bluetooth.Events.DeviceAddedEventArgs e)
+        {
+            await RunOnUiThread(() =>
+            {
+                PairedCollection.Add(e.Device);
+                Debug.WriteLine("Paired Device Added: " + e.Device.Id);
+            });
         }
 
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-        }
-
-        private async void OnDeviceEnumerationCompleted(object sender, object e)
-        {
-            Debug.WriteLine("Device Enumeration Completed");
-        }
-
-        private async void OnDeviceEnumerationStopped(object sender, object e)
-        {
-            Debug.WriteLine("Device Enumeration Stopped");
-        }
-
-        private async void OnDeviceUpdated(object sender, Wwssi.Bluetooth.Events.DeviceUpdatedEventArgs e)
-        {
-            Debug.WriteLine("Device Updated");
         }
 
         private async void OnDeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
@@ -81,7 +90,7 @@ namespace MonitorUI
                 var foundItem = UnpairedCollection.FirstOrDefault(a => a.Id == e.Device.Id);
                 if (foundItem != null)
                     UnpairedCollection.Remove(foundItem);
-                Debug.WriteLine("Device Removed: " + e.Device.Id);
+                Debug.WriteLine("Unpaired Device Removed: " + e.Device.Id);
             });
         }
 
@@ -90,7 +99,7 @@ namespace MonitorUI
             await RunOnUiThread(() =>
             {
                 UnpairedCollection.Add(e.Device);
-                Debug.WriteLine("Device Added: " + e.Device.Id);
+                Debug.WriteLine("Unpaired Device Added: " + e.Device.Id);
             });
         }
 
@@ -98,6 +107,7 @@ namespace MonitorUI
         {
             base.OnClosing(e);
             _unpairedWatcher.Stop();
+            _pairedWatcher.Stop();
         }
 
         private async Task RunOnUiThread(Action a)
@@ -116,8 +126,24 @@ namespace MonitorUI
                 var result = await _unpairedWatcher.PairDevice(selectedItem.Id);
                 MessageBox.Show(result.Status);
             }
+            else
+            {
+                MessageBox.Show("Must select an unpaired device");
+            }
+        }
 
-            this.Close();
+        private async void UnpairDeviceButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedItem = (WatcherDevice)pairedListView.SelectedItem;
+            if (selectedItem != null)
+            {
+                var result = await _pairedWatcher.UnpairDevice(selectedItem.Id);
+                MessageBox.Show(result.Status);
+            }
+            else
+            {
+                MessageBox.Show("Must select an paired device");
+            }
         }
     }
 }
