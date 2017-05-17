@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MonitorUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="640" HorizontalAlignment="Center" VerticalAlignment="Center">
+        Title="MainWindow" Height="500" Width="640" HorizontalAlignment="Center" VerticalAlignment="Center" Loaded="Window_Loaded">
     <Grid >
         <StackPanel x:Name="TopStackPanel">
             <TextBlock x:Name="TxtStatus"

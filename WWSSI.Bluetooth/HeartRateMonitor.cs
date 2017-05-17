@@ -155,7 +155,7 @@ namespace Wwssi.Bluetooth
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if (_heartRateDevice != null) await _heartRateDevice.Close();
+            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus== BluetoothConnectionStatus.Connected) await _heartRateDevice.Close();
         }
 
         /// <summary>

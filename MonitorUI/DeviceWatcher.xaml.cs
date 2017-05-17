@@ -78,11 +78,6 @@ namespace MonitorUI
             });
         }
 
-        protected override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-        }
-
         private async void OnDeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
         {
             await RunOnUiThread(() =>
@@ -144,6 +139,11 @@ namespace MonitorUI
             {
                 MessageBox.Show("Must select an paired device");
             }
+        }
+
+        private void OkButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
         }
     }
 }

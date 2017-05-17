@@ -42,7 +42,8 @@
 
     <Grid x:Name="RootGrid" Margin="12,20,12,12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" >
@@ -83,10 +84,11 @@
             </StackPanel>
         </ScrollViewer>
 
+        <Button x:Name="OkButton" Content="Ok" Grid.Row="1" HorizontalAlignment="Right" Width="100" Click="OkButton_Click" />
         <!-- Status Block for providing messages to the user.  Use the
              NotifyUser() method to populate the message -->
-        <Border x:Name="ErrorBorder" Background="Red" Grid.Row="1"/>
-        <TextBlock x:Name="StatusBlock" Grid.Row="1" Margin="12, 10, 12, 10" Visibility="Collapsed"/>
+        <Border x:Name="ErrorBorder" Background="Red" Grid.Row="2"/>
+        <TextBlock x:Name="StatusBlock" Grid.Row="2" Margin="12, 10, 12, 10" Visibility="Collapsed"/>
     </Grid>
 
 </Window>

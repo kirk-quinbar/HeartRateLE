@@ -28,8 +28,8 @@ namespace MonitorUI
         public MainWindow()
         {
             InitializeComponent();
-            _heartRateMonitor = new Wwssi.Bluetooth.HeartRateMonitor();
 
+            _heartRateMonitor = new Wwssi.Bluetooth.HeartRateMonitor();
             DeviceComboBox.DisplayMemberPath = "Name";
 
             // we should always monitor the connection status
@@ -42,18 +42,7 @@ namespace MonitorUI
             _heartRateMonitor.RateChanged += HrParserOnValueChanged;
         }
 
-        
-        protected async override void OnActivated(EventArgs e)
-        {
-            base.OnActivated(e);
-
-            var allDevices = await _heartRateMonitor.GetAllDevicesAsync();
-            DeviceComboBox.ItemsSource = allDevices;
-
-            Debug.WriteLine("OnActivated");
-        }
-
-        protected async override void OnClosing(CancelEventArgs e)
+       protected async override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
             await _heartRateMonitor.DisconnectAsync();
@@ -71,9 +60,9 @@ namespace MonitorUI
             var device = await _heartRateMonitor.ConnectAsync(selectedItem.Name);
 
             d("Button CONNECT clicked.");
-            if (device == null)
+            if (device == null || !device.IsConnected)
             {
-                MessageBox.Show("Could not find any heart rate device!");
+                MessageBox.Show(string.Format("Could not connect to {0}", selectedItem.Name));
                 return;
             }
 
@@ -156,11 +145,26 @@ namespace MonitorUI
            });
         }
 
-        private void PairDeviceButton_Click(object sender, RoutedEventArgs e)
+        private async void PairDeviceButton_Click(object sender, RoutedEventArgs e)
         {
             var deviceWatcher = new DeviceWatcher();
             var result = deviceWatcher.ShowDialog();
+
+            await GetPairedDevices();
         }
 
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            d("Window_Loaded");
+
+            await GetPairedDevices();
+        }
+
+        private async Task GetPairedDevices()
+        {
+            var allDevices = await _heartRateMonitor.GetAllDevicesAsync();
+            DeviceComboBox.ItemsSource = allDevices;
+            DeviceComboBox.SelectedIndex = 0;
+        }
     }
 }
