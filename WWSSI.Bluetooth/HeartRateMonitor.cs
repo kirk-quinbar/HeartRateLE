@@ -123,6 +123,17 @@ namespace Wwssi.Bluetooth
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance is connected.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is connected; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsConnected
+        {
+            get { return _heartRateDevice.IsConnected; }
+        }
+
+        /// <summary>
         /// Connects the first BLE heart rate device.
         /// </summary>
         public async Task<Schema.HeartRateDevice> ConnectAsync()
@@ -155,7 +166,7 @@ namespace Wwssi.Bluetooth
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus== BluetoothConnectionStatus.Connected) await _heartRateDevice.Close();
+            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected) await _heartRateDevice.Close();
         }
 
         /// <summary>
