@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wwssi.Bluetooth", "WWSSI.Bluetooth\Wwssi.Bluetooth.csproj", "{CE863405-A1F9-464D-AEED-E265C8244689}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeartRateLE.Bluetooth", "WWSSI.Bluetooth\HeartRateLE.Bluetooth.csproj", "{CE863405-A1F9-464D-AEED-E265C8244689}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonitorUI", "MonitorUI\MonitorUI.csproj", "{B585EF35-DC34-48CE-A070-0BB2095756D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeartRateLE.UI", "MonitorUI\HeartRateLE.UI.csproj", "{B585EF35-DC34-48CE-A070-0BB2095756D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

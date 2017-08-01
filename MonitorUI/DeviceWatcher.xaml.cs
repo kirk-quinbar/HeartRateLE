@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Wwssi.Bluetooth.Schema;
 
-namespace MonitorUI
+namespace HeartRateLE.UI
 {
     /// <summary>
     /// Interaction logic for DeviceWatcher.xaml

@@ -12,12 +12,12 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using MonitorUI;
+using HeartRateLE.UI;
 using System.Diagnostics;
 using Wwssi.Bluetooth.Events;
 using System.ComponentModel;
 
-namespace MonitorUI
+namespace HeartRateLE.UI
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

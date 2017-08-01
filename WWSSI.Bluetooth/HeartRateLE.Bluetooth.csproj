@@ -7,8 +7,8 @@
     <ProjectGuid>{CE863405-A1F9-464D-AEED-E265C8244689}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Wwssi.Bluetooth</RootNamespace>
-    <AssemblyName>Wwssi.Bluetooth</AssemblyName>
+    <RootNamespace>HeartRateLE.Bluetooth</RootNamespace>
+    <AssemblyName>HeartRateLE.Bluetooth</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
