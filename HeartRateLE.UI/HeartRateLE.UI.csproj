@@ -104,7 +104,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WWSSI.Bluetooth\HeartRateLE.Bluetooth.csproj">
+    <ProjectReference Include="..\HeartRateLE.Bluetooth\HeartRateLE.Bluetooth.csproj">
       <Project>{ce863405-a1f9-464d-aeed-e265c8244689}</Project>
       <Name>HeartRateLE.Bluetooth</Name>
     </ProjectReference>
