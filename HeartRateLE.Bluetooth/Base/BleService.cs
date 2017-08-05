@@ -36,7 +36,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Media.Devices;
 
-namespace Wwssi.Bluetooth.Base
+namespace HeartRateLE.Bluetooth.Base
 { 
     /// <summary>
     /// Base class for all services included in the Bluetooth Smart device.

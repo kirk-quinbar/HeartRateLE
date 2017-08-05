@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using HeartRateLE.UI;
 using System.Diagnostics;
-using Wwssi.Bluetooth.Events;
+using HeartRateLE.Bluetooth.Events;
 using System.ComponentModel;
 
 namespace HeartRateLE.UI
@@ -24,12 +24,12 @@ namespace HeartRateLE.UI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Wwssi.Bluetooth.HeartRateMonitor _heartRateMonitor;
+        private HeartRateLE.Bluetooth.HeartRateMonitor _heartRateMonitor;
         public MainWindow()
         {
             InitializeComponent();
 
-            _heartRateMonitor = new Wwssi.Bluetooth.HeartRateMonitor();
+            _heartRateMonitor = new HeartRateLE.Bluetooth.HeartRateMonitor();
             DeviceComboBox.DisplayMemberPath = "Name";
 
             // we should always monitor the connection status
@@ -50,7 +50,7 @@ namespace HeartRateLE.UI
 
         private async void BtnConnect_Click(object sender, RoutedEventArgs e)
         {
-            var selectedItem = (Wwssi.Bluetooth.Schema.HeartRateDevice)DeviceComboBox.SelectedItem;
+            var selectedItem = (HeartRateLE.Bluetooth.Schema.HeartRateDevice)DeviceComboBox.SelectedItem;
             if (selectedItem == null)
             {
                 MessageBox.Show("Must select a device to connect");

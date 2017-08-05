@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
 
-namespace Wwssi.Bluetooth.Base
+namespace HeartRateLE.Bluetooth.Base
 {
     /// <summary>
     /// Top Level Bluetooth device's wrapper class. It represents the whole device and includes references

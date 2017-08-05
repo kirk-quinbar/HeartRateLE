@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
 
-namespace Wwssi.Bluetooth.Base
+namespace HeartRateLE.Bluetooth.Base
 {
     internal class BleCharacteristic : BleBase
     {

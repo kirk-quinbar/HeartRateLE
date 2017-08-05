@@ -5,12 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
-using Wwssi.Bluetooth.Base;
-using Wwssi.Bluetooth.Events;
-using Wwssi.Bluetooth.HeartRate;
-using Wwssi.Bluetooth.Parsers;
+using HeartRateLE.Bluetooth.Base;
+using HeartRateLE.Bluetooth.Events;
+using HeartRateLE.Bluetooth.HeartRate;
+using HeartRateLE.Bluetooth.Parsers;
 
-namespace Wwssi.Bluetooth
+namespace HeartRateLE.Bluetooth
 {
     /// <summary>
     /// 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wwssi.Bluetooth.Schema
+namespace HeartRateLE.Bluetooth.Schema
 {
     public class HeartRateDeviceInfo
     {

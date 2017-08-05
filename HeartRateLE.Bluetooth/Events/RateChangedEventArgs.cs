@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wwssi.Bluetooth.Events
+namespace HeartRateLE.Bluetooth.Events
 {
     public class RateChangedEventArgs : EventArgs
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 
-namespace Wwssi.Bluetooth.Schema
+namespace HeartRateLE.Bluetooth.Schema
 {
     public class DeviceSelectorInfo
     {

@@ -14,7 +14,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Wwssi.Bluetooth.Schema;
+using HeartRateLE.Bluetooth.Schema;
 
 namespace HeartRateLE.UI
 {
@@ -35,8 +35,8 @@ namespace HeartRateLE.UI
             private set;
         }
 
-        private Wwssi.Bluetooth.Watcher _unpairedWatcher;
-        private Wwssi.Bluetooth.Watcher _pairedWatcher;
+        private HeartRateLE.Bluetooth.Watcher _unpairedWatcher;
+        private HeartRateLE.Bluetooth.Watcher _pairedWatcher;
 
         public DeviceWatcher()
         {
@@ -46,19 +46,19 @@ namespace HeartRateLE.UI
             PairedCollection = new ObservableCollection<WatcherDevice>();
             this.DataContext = this;
 
-            _unpairedWatcher = new Wwssi.Bluetooth.Watcher(DeviceSelector.BluetoothLeUnpairedOnly);
+            _unpairedWatcher = new HeartRateLE.Bluetooth.Watcher(DeviceSelector.BluetoothLeUnpairedOnly);
             _unpairedWatcher.DeviceAdded += OnDeviceAdded;
             _unpairedWatcher.DeviceRemoved += OnDeviceRemoved;
             _unpairedWatcher.Start();
 
-            _pairedWatcher = new Wwssi.Bluetooth.Watcher(DeviceSelector.BluetoothLePairedOnly);
+            _pairedWatcher = new HeartRateLE.Bluetooth.Watcher(DeviceSelector.BluetoothLePairedOnly);
             _pairedWatcher.DeviceAdded += OnPaired_DeviceAdded;
             _pairedWatcher.DeviceRemoved += OnPaired_DeviceRemoved;
 
             _pairedWatcher.Start();
         }
 
-        private async void OnPaired_DeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
+        private async void OnPaired_DeviceRemoved(object sender, HeartRateLE.Bluetooth.Events.DeviceRemovedEventArgs e)
         {
             await RunOnUiThread(() =>
             {
@@ -69,7 +69,7 @@ namespace HeartRateLE.UI
             });
         }
 
-        private async void OnPaired_DeviceAdded(object sender, Wwssi.Bluetooth.Events.DeviceAddedEventArgs e)
+        private async void OnPaired_DeviceAdded(object sender, HeartRateLE.Bluetooth.Events.DeviceAddedEventArgs e)
         {
             await RunOnUiThread(() =>
             {
@@ -78,7 +78,7 @@ namespace HeartRateLE.UI
             });
         }
 
-        private async void OnDeviceRemoved(object sender, Wwssi.Bluetooth.Events.DeviceRemovedEventArgs e)
+        private async void OnDeviceRemoved(object sender, HeartRateLE.Bluetooth.Events.DeviceRemovedEventArgs e)
         {
             await RunOnUiThread(() =>
             {
@@ -89,7 +89,7 @@ namespace HeartRateLE.UI
             });
         }
 
-        private async void OnDeviceAdded(object sender, Wwssi.Bluetooth.Events.DeviceAddedEventArgs e)
+        private async void OnDeviceAdded(object sender, HeartRateLE.Bluetooth.Events.DeviceAddedEventArgs e)
         {
             await RunOnUiThread(() =>
             {

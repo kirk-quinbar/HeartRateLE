@@ -26,9 +26,9 @@ SOFTWARE.
 // with plugin Windows 10 UWP Client (version 1.0.0 released on 2016.03.16).
 // Plugin developed by Matchbox Mobile Limited.
 
-using Wwssi.Bluetooth.Base;
+using HeartRateLE.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.HeartRate
+namespace HeartRateLE.Bluetooth.HeartRate
 {
     internal class BleDeviceInformationService : BleService
     {

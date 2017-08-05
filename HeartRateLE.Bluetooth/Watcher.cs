@@ -10,20 +10,10 @@ using Windows.Devices.Enumeration;
 using Windows.Graphics.Imaging;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace Wwssi.Bluetooth
+namespace HeartRateLE.Bluetooth
 {
     public class Watcher
     {
-        private static Schema.DeviceSelectorInfo BluetoothLE
-        {
-            get
-            {
-                // Currently Bluetooth APIs don't provide a selector to get ALL devices that are both paired and non-paired.  Typically you wouldn't need this for common scenarios, but it's convenient to demonstrate the
-                // various sample scenarios. 
-                return new Schema.DeviceSelectorInfo() { DisplayName = "Bluetooth LE", Selector = "System.Devices.Aep.ProtocolId:=\"{bb7bb05e-5972-42b5-94fc-76eaa7084d49}\"", Kind = DeviceInformationKind.AssociationEndpoint };
-            }
-        }
-
         private static Schema.DeviceSelectorInfo BluetoothLEUnpairedOnly
         {
             get
@@ -88,14 +78,12 @@ namespace Wwssi.Bluetooth
         {
             switch (deviceSelector)
             {
-                case Schema.DeviceSelector.BluetoothLe:
-                    return BluetoothLE.Selector;
                 case Schema.DeviceSelector.BluetoothLePairedOnly:
                     return BluetoothLEPairedOnly.Selector;
                 case Schema.DeviceSelector.BluetoothLeUnpairedOnly:
                     return BluetoothLEUnpairedOnly.Selector;
                 default:
-                    return BluetoothLE.Selector;
+                    return BluetoothLEUnpairedOnly.Selector;
             }
         }
 

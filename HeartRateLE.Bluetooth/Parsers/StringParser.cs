@@ -32,9 +32,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Storage.Streams;
-using Wwssi.Bluetooth.Base;
+using HeartRateLE.Bluetooth.Base;
 
-namespace Wwssi.Bluetooth.Parsers
+namespace HeartRateLE.Bluetooth.Parsers
 {
     internal class StringParser : BleValueParser<String, String>
     {
