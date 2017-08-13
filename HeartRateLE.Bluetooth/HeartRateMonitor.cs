@@ -101,12 +101,12 @@ namespace HeartRateLE.Bluetooth
             _heartRateDevice.DeviceConnectionStatusChanged += BleDeviceConnectionStatusChanged;
 
             // we can create value parser and listen for parsed values of given characteristic
-            _heartRateParser.ConnectWithCharacteristic(_heartRateDevice.HeartRate.HeartRateMeasurement);
+            await _heartRateParser.ConnectWithCharacteristicAsync(_heartRateDevice.HeartRate.HeartRateMeasurement);
             _heartRateParser.ValueChanged -= BleDeviceValueChanged;
             _heartRateParser.ValueChanged += BleDeviceValueChanged;
 
             // connect also battery level parser to proper characteristic
-            _batteryParser.ConnectWithCharacteristic(_heartRateDevice.BatteryService.BatteryLevel);
+            await _batteryParser.ConnectWithCharacteristicAsync(_heartRateDevice.BatteryService.BatteryLevel);
 
             //            // we can monitor raw data notified by BLE device for specific characteristic
             //            HrDevice.HeartRate.HeartRateMeasurement.ValueChanged -= HeartRateMeasurementOnValueChanged;
@@ -166,7 +166,8 @@ namespace HeartRateLE.Bluetooth
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected) await _heartRateDevice.Close();
+            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
+                await _heartRateDevice.CloseAsync();
         }
 
         /// <summary>
@@ -175,7 +176,7 @@ namespace HeartRateLE.Bluetooth
         /// <returns></returns>
         public async Task EnableNotificationsAsync()
         {
-            await _heartRateParser.EnableNotifications();
+            await _heartRateParser.EnableNotificationsAsync();
         }
 
         /// <summary>
@@ -184,7 +185,7 @@ namespace HeartRateLE.Bluetooth
         /// <returns></returns>
         public async Task DisableNotificationsAsync()
         {
-            await _heartRateParser.DisableNotifications();
+            await _heartRateParser.DisableNotificationsAsync();
         }
 
         /// <summary>
@@ -193,16 +194,16 @@ namespace HeartRateLE.Bluetooth
         /// <returns></returns>
         public async Task<Schema.HeartRateDeviceInfo> GetDeviceInfoAsync()
         {
-            byte battery = await _batteryParser.Read();
+            byte battery = await _batteryParser.ReadAsync();
 
             return new Schema.HeartRateDeviceInfo()
             {
                 Name = _heartRateDevice.Name,
-                Firmware = await _heartRateDevice.DeviceInformation.FirmwareRevisionString.ReadAsString(),
-                Hardware = await _heartRateDevice.DeviceInformation.HardwareRevisionString.ReadAsString(),
-                Manufacturer = await _heartRateDevice.DeviceInformation.ManufacturerNameString.ReadAsString(),
-                SerialNumber = await _heartRateDevice.DeviceInformation.SerialNumberString.ReadAsString(),
-                ModelNumber = await _heartRateDevice.DeviceInformation.ModelNumberString.ReadAsString(),
+                Firmware = await _heartRateDevice.DeviceInformation.FirmwareRevisionString.ReadAsStringAsync(),
+                Hardware = await _heartRateDevice.DeviceInformation.HardwareRevisionString.ReadAsStringAsync(),
+                Manufacturer = await _heartRateDevice.DeviceInformation.ManufacturerNameString.ReadAsStringAsync(),
+                SerialNumber = await _heartRateDevice.DeviceInformation.SerialNumberString.ReadAsStringAsync(),
+                ModelNumber = await _heartRateDevice.DeviceInformation.ModelNumberString.ReadAsStringAsync(),
                 BatteryPercent = Convert.ToInt32(battery)
             };
         }
