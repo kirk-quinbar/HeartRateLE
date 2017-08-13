@@ -63,6 +63,7 @@
     <Compile Include="HeartRate\BleDeviceInformationService.cs" />
     <Compile Include="HeartRate\BleHeartRate.cs" />
     <Compile Include="HeartRate\BleHeartRateService.cs" />
+    <Compile Include="PairingHelper.cs" />
     <Compile Include="Parsers\BatteryLevelParser.cs" />
     <Compile Include="Parsers\HeartRateMeasurementParser.cs" />
     <Compile Include="Parsers\StringParser.cs" />
@@ -73,7 +74,7 @@
     <Compile Include="Schema\HeartRateDeviceInfo.cs" />
     <Compile Include="Schema\DeviceSelectorInfo.cs" />
     <Compile Include="Schema\WatcherDevice.cs" />
-    <Compile Include="Watcher.cs" />
+    <Compile Include="HeartDeviceWatcher.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

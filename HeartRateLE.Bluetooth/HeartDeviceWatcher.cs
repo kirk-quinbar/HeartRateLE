@@ -12,7 +12,7 @@ using Windows.UI.Xaml.Media.Imaging;
 
 namespace HeartRateLE.Bluetooth
 {
-    public class Watcher
+    public class HeartDeviceWatcher
     {
         private static Schema.DeviceSelectorInfo BluetoothLEUnpairedOnly
         {
@@ -30,7 +30,6 @@ namespace HeartRateLE.Bluetooth
             }
         }
 
-        private List<DeviceInformation> _devices;
         private DeviceWatcher _deviceWatcher;
 
         public event EventHandler<Events.DeviceAddedEventArgs> DeviceAdded;
@@ -63,9 +62,9 @@ namespace HeartRateLE.Bluetooth
             DeviceEnumerationStopped?.Invoke(this, obj);
         }
 
-        public Watcher(Schema.DeviceSelector deviceSelector)
+        public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector)
         {
-            _devices = new List<DeviceInformation>();
+            //_devices = new List<DeviceInformation>();
             _deviceWatcher = DeviceInformation.CreateWatcher(GetSelector(deviceSelector));
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
@@ -112,7 +111,6 @@ namespace HeartRateLE.Bluetooth
                     Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
                 }
             };
-            _devices.Add(deviceInformation);
 
             OnDeviceAdded(args);
         }
@@ -145,10 +143,6 @@ namespace HeartRateLE.Bluetooth
                 }
             };
 
-            var foundItem = _devices.FirstOrDefault(a => a.Id == deviceInformationUpdate.Id);
-            if (foundItem != null)
-                _devices.Remove(foundItem);
-
             OnDeviceRemoved(args);
         }
 
@@ -162,54 +156,6 @@ namespace HeartRateLE.Bluetooth
             if (_deviceWatcher.Status == DeviceWatcherStatus.Started || _deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
             {
                 _deviceWatcher.Stop();
-            }
-        }
-
-        public async Task<Schema.PairingResult> PairDevice(string Id)
-        {
-            var foundItem = _devices.FirstOrDefault(a => a.Id == Id);
-            if (foundItem != null)
-            {
-                foundItem.Pairing.Custom.PairingRequested += Custom_PairingRequested;
-                var result = await foundItem.Pairing.Custom.PairAsync(DevicePairingKinds.ConfirmOnly);
-
-                return new Schema.PairingResult()
-                {
-                    Status = result.Status.ToString()
-                };
-            }
-            else
-            {
-                return new Schema.PairingResult()
-                {
-                    Status = string.Format("Device Id:{0} not found", Id)
-                };
-            }
-        }
-
-        private void Custom_PairingRequested(DeviceInformationCustomPairing sender, DevicePairingRequestedEventArgs args)
-        {
-            args.Accept();
-            //throw new NotImplementedException();
-        }
-
-        public async Task<Schema.PairingResult> UnpairDevice(string Id)
-        {
-            var foundItem = _devices.FirstOrDefault(a => a.Id == Id);
-            if (foundItem != null)
-            {
-                var result = await foundItem.Pairing.UnpairAsync();
-                return new Schema.PairingResult()
-                {
-                    Status = result.Status.ToString()
-                };
-            }
-            else
-            {
-                return new Schema.PairingResult()
-                {
-                    Status = string.Format("Device Id:{0} not found", Id)
-                };
             }
         }
     }

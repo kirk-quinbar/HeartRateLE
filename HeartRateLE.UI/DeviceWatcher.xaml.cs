@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using HeartRateLE.Bluetooth.Schema;
+using HeartRateLE.Bluetooth;
 
 namespace HeartRateLE.UI
 {
@@ -35,8 +36,8 @@ namespace HeartRateLE.UI
             private set;
         }
 
-        private HeartRateLE.Bluetooth.Watcher _unpairedWatcher;
-        private HeartRateLE.Bluetooth.Watcher _pairedWatcher;
+        private HeartRateLE.Bluetooth.HeartDeviceWatcher _unpairedWatcher;
+        private HeartRateLE.Bluetooth.HeartDeviceWatcher _pairedWatcher;
 
         public DeviceWatcher()
         {
@@ -46,12 +47,12 @@ namespace HeartRateLE.UI
             PairedCollection = new ObservableCollection<WatcherDevice>();
             this.DataContext = this;
 
-            _unpairedWatcher = new HeartRateLE.Bluetooth.Watcher(DeviceSelector.BluetoothLeUnpairedOnly);
+            _unpairedWatcher = new HeartRateLE.Bluetooth.HeartDeviceWatcher(DeviceSelector.BluetoothLeUnpairedOnly);
             _unpairedWatcher.DeviceAdded += OnDeviceAdded;
             _unpairedWatcher.DeviceRemoved += OnDeviceRemoved;
             _unpairedWatcher.Start();
 
-            _pairedWatcher = new HeartRateLE.Bluetooth.Watcher(DeviceSelector.BluetoothLePairedOnly);
+            _pairedWatcher = new HeartRateLE.Bluetooth.HeartDeviceWatcher(DeviceSelector.BluetoothLePairedOnly);
             _pairedWatcher.DeviceAdded += OnPaired_DeviceAdded;
             _pairedWatcher.DeviceRemoved += OnPaired_DeviceRemoved;
 
@@ -118,7 +119,7 @@ namespace HeartRateLE.UI
             var selectedItem = (WatcherDevice)unpairedListView.SelectedItem;
             if (selectedItem != null)
             {
-                var result = await _unpairedWatcher.PairDevice(selectedItem.Id);
+                var result = await PairingHelper.PairDeviceAsync(selectedItem.Id);
                 MessageBox.Show(result.Status);
             }
             else
@@ -132,7 +133,7 @@ namespace HeartRateLE.UI
             var selectedItem = (WatcherDevice)pairedListView.SelectedItem;
             if (selectedItem != null)
             {
-                var result = await _pairedWatcher.UnpairDevice(selectedItem.Id);
+                var result = await PairingHelper.UnpairDeviceAsync(selectedItem.Id);
                 MessageBox.Show(result.Status);
             }
             else
