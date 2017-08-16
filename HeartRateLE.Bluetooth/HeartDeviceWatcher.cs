@@ -31,6 +31,7 @@ namespace HeartRateLE.Bluetooth
         }
 
         private DeviceWatcher _deviceWatcher;
+        private List<string> _filters;
 
         public event EventHandler<Events.DeviceAddedEventArgs> DeviceAdded;
         protected virtual void OnDeviceAdded(Events.DeviceAddedEventArgs e)
@@ -64,13 +65,17 @@ namespace HeartRateLE.Bluetooth
 
         public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector)
         {
-            //_devices = new List<DeviceInformation>();
             _deviceWatcher = DeviceInformation.CreateWatcher(GetSelector(deviceSelector));
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
             _deviceWatcher.Removed += Removed;
             _deviceWatcher.EnumerationCompleted += EnumerationCompleted;
             _deviceWatcher.Stopped += Stopped;
+        }
+
+        public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector, List<string> filters) : base()
+        {
+            _filters = filters;
         }
 
         private string GetSelector(Schema.DeviceSelector deviceSelector)
@@ -96,54 +101,75 @@ namespace HeartRateLE.Bluetooth
             OnDeviceEnumerationCompleted(obj);
         }
 
-        private void Added(DeviceWatcher watcher, DeviceInformation deviceInformation)
+        private async Task<bool> IsDeviceCompatible(string deviceId)
         {
-            var args = new Events.DeviceAddedEventArgs()
-            {
-                Device = new Schema.WatcherDevice()
-                {
-                    Id = deviceInformation.Id,
-                    IsDefault = deviceInformation.IsDefault,
-                    IsEnabled = deviceInformation.IsEnabled,
-                    Name = deviceInformation.Name,
-                    IsPaired = deviceInformation.Pairing.IsPaired,
-                    Kind = deviceInformation.Kind.ToString(),
-                    Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
-                }
-            };
+            var compatibleDevice = true;
+            var device = await BluetoothLEDevice.FromIdAsync(deviceId);
 
-            OnDeviceAdded(args);
+            if (_filters != null)
+            {
+                compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
+            }
+            
+            return compatibleDevice;
         }
 
-        private void Updated(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
+        private async void Added(DeviceWatcher watcher, DeviceInformation deviceInformation)
         {
-            var args = new Events.DeviceUpdatedEventArgs()
+            if (await IsDeviceCompatible(deviceInformation.Id))
             {
-                Device = new Schema.WatcherDevice()
+                var args = new Events.DeviceAddedEventArgs()
                 {
-                    Id = deviceInformationUpdate.Id,
-                    Kind = deviceInformationUpdate.Kind.ToString(),
-                    Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
-                }
-            };
+                    Device = new Schema.WatcherDevice()
+                    {
+                        Id = deviceInformation.Id,
+                        IsDefault = deviceInformation.IsDefault,
+                        IsEnabled = deviceInformation.IsEnabled,
+                        Name = deviceInformation.Name,
+                        IsPaired = deviceInformation.Pairing.IsPaired,
+                        Kind = deviceInformation.Kind.ToString(),
+                        Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                    }
+                };
 
-
-            OnDeviceUpdated(args);
+                OnDeviceAdded(args);
+            }
         }
 
-        private void Removed(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
+        private async void Updated(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
         {
-            var args = new Events.DeviceRemovedEventArgs()
+            if (await IsDeviceCompatible(deviceInformationUpdate.Id))
             {
-                Device = new Schema.WatcherDevice()
+                var args = new Events.DeviceUpdatedEventArgs()
                 {
-                    Id = deviceInformationUpdate.Id,
-                    Kind = deviceInformationUpdate.Kind.ToString(),
-                    Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
-                }
-            };
+                    Device = new Schema.WatcherDevice()
+                    {
+                        Id = deviceInformationUpdate.Id,
+                        Kind = deviceInformationUpdate.Kind.ToString(),
+                        Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                    }
+                };
 
-            OnDeviceRemoved(args);
+                OnDeviceUpdated(args);
+            }
+        }
+
+        private async void Removed(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
+        {
+            if (await IsDeviceCompatible(deviceInformationUpdate.Id))
+            {
+                var args = new Events.DeviceRemovedEventArgs()
+                {
+                    Device = new Schema.WatcherDevice()
+                    {
+                        Id = deviceInformationUpdate.Id,
+                        Kind = deviceInformationUpdate.Kind.ToString(),
+                        Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                    }
+                };
+
+                OnDeviceRemoved(args);
+            }
         }
 
         public void Start()

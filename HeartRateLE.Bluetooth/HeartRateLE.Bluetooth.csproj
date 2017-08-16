@@ -58,6 +58,7 @@
     <Compile Include="Events\DeviceUpdatedEventArgs.cs" />
     <Compile Include="Events\DeviceAddedEventArgs.cs" />
     <Compile Include="Events\RateChangedEventArgs.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="HeartRateMonitor.cs" />
     <Compile Include="HeartRate\BleBatteryServiceService.cs" />
     <Compile Include="HeartRate\BleDeviceInformationService.cs" />
