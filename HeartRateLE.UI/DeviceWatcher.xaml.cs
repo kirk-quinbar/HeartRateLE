@@ -36,6 +36,9 @@ namespace HeartRateLE.UI
             private set;
         }
 
+        public string SelectedDeviceId { get; set; }
+        public string SelectedDeviceName { get; set; }
+
         private HeartRateLE.Bluetooth.HeartDeviceWatcher _unpairedWatcher;
         private HeartRateLE.Bluetooth.HeartDeviceWatcher _pairedWatcher;
 
@@ -57,6 +60,8 @@ namespace HeartRateLE.UI
             _pairedWatcher.DeviceRemoved += OnPaired_DeviceRemoved;
 
             _pairedWatcher.Start();
+            SelectedDeviceId = string.Empty;
+            SelectedDeviceName = string.Empty;
         }
 
         private async void OnPaired_DeviceRemoved(object sender, HeartRateLE.Bluetooth.Events.DeviceRemovedEventArgs e)
@@ -144,7 +149,17 @@ namespace HeartRateLE.UI
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
+            var selectedItem = (WatcherDevice)pairedListView.SelectedItem;
+            if (selectedItem != null)
+            {
+                SelectedDeviceId = selectedItem.Id;
+                SelectedDeviceName = selectedItem.Name;
+                DialogResult = true;
+            }
+            else
+            {
+                MessageBox.Show("Must select an paired device");
+            }
         }
     }
 }

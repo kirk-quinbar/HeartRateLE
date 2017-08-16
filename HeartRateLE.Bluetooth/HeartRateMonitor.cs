@@ -130,7 +130,7 @@ namespace HeartRateLE.Bluetooth
         /// </value>
         public bool IsConnected
         {
-            get { return _heartRateDevice.IsConnected; }
+            get { return _heartRateDevice != null ? _heartRateDevice.IsConnected : false; }
         }
 
         /// <summary>
@@ -194,18 +194,26 @@ namespace HeartRateLE.Bluetooth
         /// <returns></returns>
         public async Task<Schema.HeartRateDeviceInfo> GetDeviceInfoAsync()
         {
-            byte battery = await _batteryParser.ReadAsync();
-
-            return new Schema.HeartRateDeviceInfo()
+            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
             {
-                Name = _heartRateDevice.Name,
-                Firmware = await _heartRateDevice.DeviceInformation.FirmwareRevisionString.ReadAsStringAsync(),
-                Hardware = await _heartRateDevice.DeviceInformation.HardwareRevisionString.ReadAsStringAsync(),
-                Manufacturer = await _heartRateDevice.DeviceInformation.ManufacturerNameString.ReadAsStringAsync(),
-                SerialNumber = await _heartRateDevice.DeviceInformation.SerialNumberString.ReadAsStringAsync(),
-                ModelNumber = await _heartRateDevice.DeviceInformation.ModelNumberString.ReadAsStringAsync(),
-                BatteryPercent = Convert.ToInt32(battery)
-            };
+                byte battery = await _batteryParser.ReadAsync();
+
+                return new Schema.HeartRateDeviceInfo()
+                {
+                    DeviceId = _heartRateDevice.DeviceInfo.Id,
+                    Name = _heartRateDevice.Name,
+                    Firmware = await _heartRateDevice.DeviceInformation.FirmwareRevisionString.ReadAsStringAsync(),
+                    Hardware = await _heartRateDevice.DeviceInformation.HardwareRevisionString.ReadAsStringAsync(),
+                    Manufacturer = await _heartRateDevice.DeviceInformation.ManufacturerNameString.ReadAsStringAsync(),
+                    SerialNumber = await _heartRateDevice.DeviceInformation.SerialNumberString.ReadAsStringAsync(),
+                    ModelNumber = await _heartRateDevice.DeviceInformation.ModelNumberString.ReadAsStringAsync(),
+                    BatteryPercent = Convert.ToInt32(battery)
+                };
+            }
+            else
+            {
+                return new Schema.HeartRateDeviceInfo();
+            }
         }
     }
 }

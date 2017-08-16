@@ -8,6 +8,7 @@ namespace HeartRateLE.Bluetooth.Schema
 {
     public class HeartRateDevice
     {
+        public string DeviceId { get; set; }
         public string Name { get; set; }
         public bool IsConnected { get; set; }
         public string ErrorMessage { get; set; }

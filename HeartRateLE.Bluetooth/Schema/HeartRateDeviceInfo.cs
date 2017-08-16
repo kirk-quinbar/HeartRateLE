@@ -8,6 +8,7 @@ namespace HeartRateLE.Bluetooth.Schema
 {
     public class HeartRateDeviceInfo
     {
+        public string DeviceId { get; set; }
         public string Name { get; set; }
         public string Firmware { get; set; }
         public string Hardware { get; set; }

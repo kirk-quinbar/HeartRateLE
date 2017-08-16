@@ -25,12 +25,14 @@ namespace HeartRateLE.UI
     public partial class MainWindow : Window
     {
         private HeartRateLE.Bluetooth.HeartRateMonitor _heartRateMonitor;
+        private string SelectedDeviceId { get; set; }
+        private string SelectedDeviceName { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
 
             _heartRateMonitor = new HeartRateLE.Bluetooth.HeartRateMonitor();
-            DeviceComboBox.DisplayMemberPath = "Name";
 
             // we should always monitor the connection status
             _heartRateMonitor.ConnectionStatusChanged -= HrDeviceOnDeviceConnectionStatusChanged;
@@ -42,31 +44,15 @@ namespace HeartRateLE.UI
             _heartRateMonitor.RateChanged += HrParserOnValueChanged;
         }
 
-       protected async override void OnClosing(CancelEventArgs e)
+        protected async override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
-            await _heartRateMonitor.DisconnectAsync();
-        }
 
-        private async void BtnConnect_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedItem = (HeartRateLE.Bluetooth.Schema.HeartRateDevice)DeviceComboBox.SelectedItem;
-            if (selectedItem == null)
+            if (_heartRateMonitor.IsConnected)
             {
-                MessageBox.Show("Must select a device to connect");
-                return;
+                await _heartRateMonitor.DisableNotificationsAsync();
+                await _heartRateMonitor.DisconnectAsync();
             }
-
-            var device = await _heartRateMonitor.ConnectAsync(selectedItem.Name);
-
-            d("Button CONNECT clicked.");
-            if (device == null || !device.IsConnected)
-            {
-                MessageBox.Show(string.Format("Could not connect to {0}", selectedItem.Name));
-                return;
-            }
-
-            d("Found device: " + device.Name + " IsConnected=" + device.IsConnected);
         }
 
         private async void HrParserOnValueChanged(object sender, RateChangedEventArgs arg)
@@ -87,18 +73,16 @@ namespace HeartRateLE.UI
                 if (connected)
                 {
                     var device = await _heartRateMonitor.GetDeviceInfoAsync();
-                    TxtStatus.Text = device.Name + ": connected";
+                    TxtStatus.Text = SelectedDeviceName + ": connected";
                     TxtBattery.Text = String.Format("battery level: {0}%", device.BatteryPercent);
                 }
                 else
                 {
-                    TxtStatus.Text = "disconnected";
+                    TxtStatus.Text = SelectedDeviceName + ": disconnected";
                     TxtBattery.Text = "battery level: --";
                     TxtHr.Text = "--";
                 }
 
-                BtnStart.IsEnabled = connected;
-                BtnStop.IsEnabled = connected;
                 BtnReadInfo.IsEnabled = connected;
             });
         }
@@ -147,24 +131,26 @@ namespace HeartRateLE.UI
 
         private async void PairDeviceButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_heartRateMonitor.IsConnected)
+            {
+                SelectedDeviceId = string.Empty;
+                SelectedDeviceName = string.Empty;
+
+                await _heartRateMonitor.DisableNotificationsAsync();
+                await _heartRateMonitor.DisconnectAsync();
+            }
+
             var deviceWatcher = new DeviceWatcher();
             var result = deviceWatcher.ShowDialog();
+            if (result.Value)
+            {
+                SelectedDeviceId = deviceWatcher.SelectedDeviceId;
+                SelectedDeviceName = deviceWatcher.SelectedDeviceName;
 
-            await GetPairedDevices();
+                await _heartRateMonitor.ConnectAsync(SelectedDeviceName);
+                await _heartRateMonitor.EnableNotificationsAsync();
+            }
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            d("Window_Loaded");
-
-            await GetPairedDevices();
-        }
-
-        private async Task GetPairedDevices()
-        {
-            var allDevices = await _heartRateMonitor.GetAllDevicesAsync();
-            DeviceComboBox.ItemsSource = allDevices;
-            DeviceComboBox.SelectedIndex = 0;
-        }
     }
 }
