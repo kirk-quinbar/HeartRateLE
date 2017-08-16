@@ -22,7 +22,7 @@ namespace HeartRateLE.UI
     /// <summary>
     /// Interaction logic for DeviceWatcher.xaml
     /// </summary>
-    public partial class DeviceWatcher : Window
+    public partial class DevicePicker : Window
     {
         public ObservableCollection<WatcherDevice> UnpairedCollection
         {
@@ -42,7 +42,7 @@ namespace HeartRateLE.UI
         private HeartRateLE.Bluetooth.HeartDeviceWatcher _unpairedWatcher;
         private HeartRateLE.Bluetooth.HeartDeviceWatcher _pairedWatcher;
 
-        public DeviceWatcher()
+        public DevicePicker()
         {
             InitializeComponent();
 

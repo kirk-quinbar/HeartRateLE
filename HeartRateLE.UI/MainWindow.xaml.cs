@@ -140,12 +140,12 @@ namespace HeartRateLE.UI
                 await _heartRateMonitor.DisconnectAsync();
             }
 
-            var deviceWatcher = new DeviceWatcher();
-            var result = deviceWatcher.ShowDialog();
+            var devicePicker = new DevicePicker();
+            var result = devicePicker.ShowDialog();
             if (result.Value)
             {
-                SelectedDeviceId = deviceWatcher.SelectedDeviceId;
-                SelectedDeviceName = deviceWatcher.SelectedDeviceName;
+                SelectedDeviceId = devicePicker.SelectedDeviceId;
+                SelectedDeviceName = devicePicker.SelectedDeviceName;
 
                 await _heartRateMonitor.ConnectAsync(SelectedDeviceName);
                 await _heartRateMonitor.EnableNotificationsAsync();
