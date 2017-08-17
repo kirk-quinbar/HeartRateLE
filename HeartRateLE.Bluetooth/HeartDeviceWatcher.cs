@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HeartRateLE.Bluetooth.Base;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -30,6 +31,7 @@ namespace HeartRateLE.Bluetooth
             }
         }
 
+        private static readonly string[] RequiredServices = new string[] { "180D", "180A", "180F" };
         private DeviceWatcher _deviceWatcher;
         private List<string> _filters;
 
@@ -73,7 +75,7 @@ namespace HeartRateLE.Bluetooth
             _deviceWatcher.Stopped += Stopped;
         }
 
-        public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector, List<string> filters) : base()
+        public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector, List<string> filters) : this(deviceSelector)
         {
             _filters = filters;
         }
@@ -106,12 +108,34 @@ namespace HeartRateLE.Bluetooth
             var compatibleDevice = true;
             var device = await BluetoothLEDevice.FromIdAsync(deviceId);
 
+            //if filters were passed, check if the device name contains one of the names in the list
             if (_filters != null)
             {
                 compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
             }
-            
+
+            //filter out any devices that are not heart rate devices. with the current bluetooth apis, this will
+            //only occur if the device is paired. the windows creator update is supposed to allow for checking for this
+            //on unpaired devices, but a recent build completely broke bluetooth le support, so this is the best
+            //that can be done for now.
+            if (device.GattServices.Any() && compatibleDevice)
+            {
+                bool matches = true;
+                foreach (var requiredService in RequiredServices)
+                {
+                    matches = CheckForCompatibility(device, requiredService.ToGuid());
+                    if (!matches)
+                        break;
+                }
+                compatibleDevice = matches;
+            }
+
             return compatibleDevice;
+        }
+
+        private static bool CheckForCompatibility(BluetoothLEDevice device, Guid uuid)
+        {
+            return device.GattServices.Any(service => uuid.Equals(service.Uuid));
         }
 
         private async void Added(DeviceWatcher watcher, DeviceInformation deviceInformation)

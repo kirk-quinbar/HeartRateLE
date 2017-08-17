@@ -77,6 +77,12 @@ namespace HeartRateLE.Bluetooth.HeartRate
             return all.FirstOrDefault(a => a.Name.Equals(deviceName, StringComparison.InvariantCultureIgnoreCase));
         }
 
+        public static async Task<BleHeartRate> FindById(string deviceId)
+        {
+            var all = await FindAll();
+            return all.FirstOrDefault(a => a.DeviceInfo.Id.Equals(deviceId, StringComparison.InvariantCultureIgnoreCase));
+        }
+
         private BleHeartRate(DeviceInformation device, BluetoothLEDevice leDevice) : base(device, leDevice)
         {
             RegisterNewService(HeartRate);
