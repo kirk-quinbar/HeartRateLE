@@ -106,28 +106,36 @@ namespace HeartRateLE.Bluetooth
         private async Task<bool> IsDeviceCompatible(string deviceId)
         {
             var compatibleDevice = true;
-            var device = await BluetoothLEDevice.FromIdAsync(deviceId);
-
-            //if filters were passed, check if the device name contains one of the names in the list
-            if (_filters != null)
+            try
             {
-                compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
-            }
+                var device = await BluetoothLEDevice.FromIdAsync(deviceId);
 
-            //filter out any devices that are not heart rate devices. with the current bluetooth apis, this will
-            //only occur if the device is paired. the windows creator update is supposed to allow for checking for this
-            //on unpaired devices, but a recent build completely broke bluetooth le support, so this is the best
-            //that can be done for now.
-            if (device.GattServices.Any() && compatibleDevice)
-            {
-                bool matches = true;
-                foreach (var requiredService in RequiredServices)
+                //if filters were passed, check if the device name contains one of the names in the list
+                if (_filters != null)
                 {
-                    matches = CheckForCompatibility(device, requiredService.ToGuid());
-                    if (!matches)
-                        break;
+                    compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
                 }
-                compatibleDevice = matches;
+
+                //filter out any devices that are not heart rate devices. with the current bluetooth apis, this will
+                //only occur if the device is paired. the windows creator update is supposed to allow for checking for this
+                //on unpaired devices, but a recent build completely broke bluetooth le support, so this is the best
+                //that can be done for now.
+                if (device.GattServices.Any() && compatibleDevice)
+                {
+                    bool matches = true;
+                    foreach (var requiredService in RequiredServices)
+                    {
+                        matches = CheckForCompatibility(device, requiredService.ToGuid());
+                        if (!matches)
+                            break;
+                    }
+                    compatibleDevice = matches;
+                }
+            }
+            catch
+            {
+
+                compatibleDevice = false;
             }
 
             return compatibleDevice;
