@@ -20,3 +20,5 @@ Specifically, this sample shows how to:
 - Interogate device for information
 - Subscribe to device events such as connection status changed and value changed
 
+
+https://blogs.windows.com/buildingapps/2017/01/25/calling-windows-10-apis-desktop-application/
