@@ -9,8 +9,9 @@ client can be any windows client that can reference a C# library (i.e. windows f
 > The Bluetooth project has a class wrapper for WinRT code (HeartRateMonitor) so that the client calling the library does not have to 
 > know about UWP objects or coding. The client only has to instantiate basic classes and schemas and attach event handlers to
 > the class. 
-> This sample makes use of another Library available in Nuget and Github called "UWP for Desktop". This provides the hooks to call
-> the WinRT api without having to use a UWP application. https://github.com/ljw1004/uwp-desktop
+> This sample makes use of the Windows 10 SDK which is installed seperately per this link:
+> https://blogs.windows.com/buildingapps/2017/01/25/calling-windows-10-apis-desktop-application/
+
 
 Specifically, this sample shows how to:
 
@@ -21,4 +22,3 @@ Specifically, this sample shows how to:
 - Subscribe to device events such as connection status changed and value changed
 
 
-https://blogs.windows.com/buildingapps/2017/01/25/calling-windows-10-apis-desktop-application/
