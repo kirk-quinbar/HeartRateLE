@@ -10,21 +10,19 @@ namespace HeartRateLE.Bluetooth
 {
     public class HeartDeviceWatcher
     {
-        private static Schema.DeviceSelectorInfo BluetoothLEUnpairedOnly
-        {
-            get
+        // Additional properties we would like about the device.
+        // Property strings are documented here https://msdn.microsoft.com/en-us/library/windows/desktop/ff521659(v=vs.85).aspx
+        string[] additionalProperties =
             {
-                return new Schema.DeviceSelectorInfo() { DisplayName = "Bluetooth LE (unpaired)", Selector = BluetoothLEDevice.GetDeviceSelectorFromPairingState(false) };
-            }
-        }
-
-        private static Schema.DeviceSelectorInfo BluetoothLEPairedOnly
-        {
-            get
-            {
-                return new Schema.DeviceSelectorInfo() { DisplayName = "Bluetooth LE (paired)", Selector = BluetoothLEDevice.GetDeviceSelectorFromPairingState(true) };
-            }
-        }
+                "System.Devices.Aep.CanPair",
+                "System.Devices.Aep.IsConnected",
+                "System.Devices.Aep.Category",
+                "System.Devices.Aep.IsPresent",
+                "System.Devices.Aep.IsPaired",
+                "System.Devices.Aep.Manufacturer",
+                "System.Devices.Aep.ModelId",
+                "System.Devices.Aep.ModelName"
+            };
 
         private static readonly string[] RequiredServices = new string[] { "180D", "180A", "180F" };
         private DeviceWatcher _deviceWatcher;
@@ -62,7 +60,12 @@ namespace HeartRateLE.Bluetooth
 
         public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector)
         {
-            _deviceWatcher = DeviceInformation.CreateWatcher(GetSelector(deviceSelector));
+            //_deviceWatcher = DeviceInformation.CreateWatcher(GetSelector(deviceSelector));
+            _deviceWatcher = DeviceInformation.CreateWatcher(
+                        GetSelector(deviceSelector),
+                        additionalProperties,
+                        DeviceInformationKind.AssociationEndpoint);
+
             _deviceWatcher.Added += Added;
             _deviceWatcher.Updated += Updated;
             _deviceWatcher.Removed += Removed;
@@ -80,11 +83,11 @@ namespace HeartRateLE.Bluetooth
             switch (deviceSelector)
             {
                 case Schema.DeviceSelector.BluetoothLePairedOnly:
-                    return BluetoothLEPairedOnly.Selector;
+                    return BluetoothLEDevice.GetDeviceSelectorFromPairingState(true);
                 case Schema.DeviceSelector.BluetoothLeUnpairedOnly:
-                    return BluetoothLEUnpairedOnly.Selector;
+                    return BluetoothLEDevice.GetDeviceSelectorFromPairingState(false);
                 default:
-                    return BluetoothLEUnpairedOnly.Selector;
+                    return "(System.Devices.Aep.ProtocolId:=\"{bb7bb05e-5972-42b5-94fc-76eaa7084d49}\")";
             }
         }
 
@@ -93,58 +96,63 @@ namespace HeartRateLE.Bluetooth
             OnDeviceEnumerationStopped(obj);
         }
 
-        private void EnumerationCompleted(DeviceWatcher watcher, object obj)
+        private void EnumerationCompleted(DeviceWatcher sender, object obj)
         {
-            OnDeviceEnumerationCompleted(obj);
+            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+            if (sender == _deviceWatcher)
+                OnDeviceEnumerationCompleted(obj);
         }
 
-        private async Task<bool> IsDeviceCompatible(string deviceId)
+        //private async Task<bool> IsDeviceCompatible(string deviceId)
+        //{
+        //    var compatibleDevice = true;
+        //    try
+        //    {
+        //        var device = await BluetoothLEDevice.FromIdAsync(deviceId);
+
+        //        //if filters were passed, check if the device name contains one of the names in the list
+        //        if (_filters != null)
+        //        {
+        //            compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
+        //        }
+
+        //        //filter out any devices that are not heart rate devices. with the current bluetooth apis, this will
+        //        //only occur if the device is paired. the windows creator update is supposed to allow for checking for this
+        //        //on unpaired devices, but a recent build completely broke bluetooth le support, so this is the best
+        //        //that can be done for now.
+        //        if (device.GattServices.Any() && compatibleDevice)
+        //        {
+        //            bool matches = true;
+        //            foreach (var requiredService in RequiredServices)
+        //            {
+        //                matches = CheckForCompatibility(device, requiredService.ToGuid());
+        //                if (!matches)
+        //                    break;
+        //            }
+        //            compatibleDevice = matches;
+        //        }
+        //    }
+        //    catch
+        //    {
+
+        //        compatibleDevice = false;
+        //    }
+
+        //    return compatibleDevice;
+        //}
+
+        //private static bool CheckForCompatibility(BluetoothLEDevice device, Guid uuid)
+        //{
+        //    return device.GattServices.Any(service => uuid.Equals(service.Uuid));
+        //}
+
+        private void Added(DeviceWatcher sender, DeviceInformation deviceInformation)
         {
-            var compatibleDevice = true;
-            try
-            {
-                var device = await BluetoothLEDevice.FromIdAsync(deviceId);
-
-                //if filters were passed, check if the device name contains one of the names in the list
-                if (_filters != null)
-                {
-                    compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
-                }
-
-                //filter out any devices that are not heart rate devices. with the current bluetooth apis, this will
-                //only occur if the device is paired. the windows creator update is supposed to allow for checking for this
-                //on unpaired devices, but a recent build completely broke bluetooth le support, so this is the best
-                //that can be done for now.
-                if (device.GattServices.Any() && compatibleDevice)
-                {
-                    bool matches = true;
-                    foreach (var requiredService in RequiredServices)
-                    {
-                        matches = CheckForCompatibility(device, requiredService.ToGuid());
-                        if (!matches)
-                            break;
-                    }
-                    compatibleDevice = matches;
-                }
-            }
-            catch
-            {
-
-                compatibleDevice = false;
-            }
-
-            return compatibleDevice;
-        }
-
-        private static bool CheckForCompatibility(BluetoothLEDevice device, Guid uuid)
-        {
-            return device.GattServices.Any(service => uuid.Equals(service.Uuid));
-        }
-
-        private async void Added(DeviceWatcher watcher, DeviceInformation deviceInformation)
-        {
-            if (await IsDeviceCompatible(deviceInformation.Id))
-            {
+            //if (await IsDeviceCompatible(deviceInformation.Id))
+            //{
+            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+            if (sender == _deviceWatcher)
+            { 
                 var args = new Events.DeviceAddedEventArgs()
                 {
                     Device = new Schema.WatcherDevice()
@@ -163,9 +171,12 @@ namespace HeartRateLE.Bluetooth
             }
         }
 
-        private async void Updated(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
+        private void Updated(DeviceWatcher sender, DeviceInformationUpdate deviceInformationUpdate)
         {
-            if (await IsDeviceCompatible(deviceInformationUpdate.Id))
+            //if (await IsDeviceCompatible(deviceInformationUpdate.Id))
+            //{
+            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+            if (sender == _deviceWatcher)
             {
                 var args = new Events.DeviceUpdatedEventArgs()
                 {
@@ -181,9 +192,12 @@ namespace HeartRateLE.Bluetooth
             }
         }
 
-        private async void Removed(DeviceWatcher watcher, DeviceInformationUpdate deviceInformationUpdate)
+        private void Removed(DeviceWatcher sender, DeviceInformationUpdate deviceInformationUpdate)
         {
-            if (await IsDeviceCompatible(deviceInformationUpdate.Id))
+            //if (await IsDeviceCompatible(deviceInformationUpdate.Id))
+            //{
+            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+            if (sender == _deviceWatcher)
             {
                 var args = new Events.DeviceRemovedEventArgs()
                 {
@@ -206,9 +220,18 @@ namespace HeartRateLE.Bluetooth
 
         public void Stop()
         {
-            if (_deviceWatcher.Status == DeviceWatcherStatus.Started || _deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
+            if (_deviceWatcher != null)
             {
+                // Unregister the event handlers.
+                _deviceWatcher.Added -= Added;
+                _deviceWatcher.Updated -= Updated;
+                _deviceWatcher.Removed -= Removed;
+                _deviceWatcher.EnumerationCompleted -= EnumerationCompleted;
+                _deviceWatcher.Stopped -= Stopped;
+
+                // Stop the watcher.
                 _deviceWatcher.Stop();
+                _deviceWatcher = null;
             }
         }
     }
