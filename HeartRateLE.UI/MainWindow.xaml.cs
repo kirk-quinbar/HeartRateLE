@@ -44,14 +44,15 @@ namespace HeartRateLE.UI
             _heartRateMonitor.RateChanged += HrParserOnValueChanged;
         }
 
-        protected async override void OnClosing(CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
 
             if (_heartRateMonitor.IsConnected)
             {
-                await _heartRateMonitor.DisableNotificationsAsync();
-                await _heartRateMonitor.DisconnectAsync();
+                //await _heartRateMonitor.DisableNotificationsAsync();
+                //await _heartRateMonitor.DisconnectAsync();
+                _heartRateMonitor.Disconnect();
             }
         }
 
@@ -72,7 +73,7 @@ namespace HeartRateLE.UI
                 bool connected = args.IsConnected;
                 if (connected)
                 {
-                    var device = await _heartRateMonitor.GetDeviceInfoAsync();
+                    var device = _heartRateMonitor.GetDeviceInfo();
                     TxtStatus.Text = SelectedDeviceName + ": connected";
                     TxtBattery.Text = String.Format("battery level: {0}%", device.BatteryPercent);
                 }
@@ -90,21 +91,21 @@ namespace HeartRateLE.UI
         private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
             d("Button START clicked.");
-            await _heartRateMonitor.EnableNotificationsAsync();
+            //await _heartRateMonitor.EnableNotificationsAsync();
             d("Notification enabled");
         }
 
         private async void BtnStop_Click(object sender, RoutedEventArgs e)
         {
             d("Button STOP clicked.");
-            await _heartRateMonitor.DisableNotificationsAsync();
+            //await _heartRateMonitor.DisableNotificationsAsync();
             d("Notification disabled.");
             TxtHr.Text = "--";
         }
 
         private async void BtnReadInfo_Click(object sender, RoutedEventArgs e)
         {
-            var deviceInfo = await _heartRateMonitor.GetDeviceInfoAsync();
+            var deviceInfo = _heartRateMonitor.GetDeviceInfo();
 
             d($" Manufacturer : {deviceInfo.Manufacturer}"); d("");
             d($"    Model : {deviceInfo.ModelNumber}"); d("");
@@ -136,8 +137,8 @@ namespace HeartRateLE.UI
                 SelectedDeviceId = string.Empty;
                 SelectedDeviceName = string.Empty;
 
-                await _heartRateMonitor.DisableNotificationsAsync();
-                await _heartRateMonitor.DisconnectAsync();
+                //await _heartRateMonitor.DisableNotificationsAsync();
+                _heartRateMonitor.Disconnect();
             }
 
             var devicePicker = new DevicePicker();
@@ -147,8 +148,8 @@ namespace HeartRateLE.UI
                 SelectedDeviceId = devicePicker.SelectedDeviceId;
                 SelectedDeviceName = devicePicker.SelectedDeviceName;
 
-                await _heartRateMonitor.ConnectAsync(SelectedDeviceName);
-                await _heartRateMonitor.EnableNotificationsAsync();
+                await _heartRateMonitor.ConnectAsync(SelectedDeviceId);
+                //await _heartRateMonitor.EnableNotificationsAsync();
             }
         }
 

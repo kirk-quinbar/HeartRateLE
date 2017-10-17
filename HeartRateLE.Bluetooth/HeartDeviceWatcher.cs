@@ -21,7 +21,8 @@ namespace HeartRateLE.Bluetooth
                 "System.Devices.Aep.IsPaired",
                 "System.Devices.Aep.Manufacturer",
                 "System.Devices.Aep.ModelId",
-                "System.Devices.Aep.ModelName"
+                "System.Devices.Aep.ModelName",
+                "System.Devices.Manufacturer"
             };
 
         private static readonly string[] RequiredServices = new string[] { "180D", "180A", "180F" };
