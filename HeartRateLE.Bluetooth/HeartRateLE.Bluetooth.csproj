@@ -77,13 +77,20 @@
     <Compile Include="Parsers\HeartRateMeasurementParser.cs" />
     <Compile Include="Parsers\StringParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schema\BluetoothAttributeType.cs" />
+    <Compile Include="Schema\BluetoothAttribute.cs" />
+    <Compile Include="Schema\CharacteristicResult.cs" />
     <Compile Include="Schema\DevicePairingResult.cs" />
     <Compile Include="Schema\DeviceSelector.cs" />
+    <Compile Include="Schema\GattNativeCharacteristicUuid.cs" />
+    <Compile Include="Schema\GattNativeDescriptorUuid.cs" />
+    <Compile Include="Schema\GattNativeServiceUuid.cs" />
     <Compile Include="Schema\HeartRateDevice.cs" />
     <Compile Include="Schema\HeartRateDeviceInfo.cs" />
     <Compile Include="Schema\DeviceSelectorInfo.cs" />
     <Compile Include="Schema\WatcherDevice.cs" />
     <Compile Include="HeartDeviceWatcher.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

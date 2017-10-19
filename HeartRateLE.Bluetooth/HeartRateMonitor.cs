@@ -1,4 +1,5 @@
 ﻿using HeartRateLE.Bluetooth.Events;
+using HeartRateLE.Bluetooth.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,15 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Devices.Enumeration;
+using Windows.Security.Cryptography;
 
 namespace HeartRateLE.Bluetooth
 {
     public class HeartRateMonitor
     {
         private BluetoothLEDevice _heartRateDevice = null;
-
-        // Only one registered characteristic at a time.
-        private GattCharacteristic registeredCharacteristic;
+        private List<BluetoothAttribute> _serviceCollection = new List<BluetoothAttribute>();
+        private GattCharacteristic _heartRateCharacteristic;
+        private GattCharacteristic _batteryCharacteristic;
 
         /// <summary>
         /// Occurs when [connection status changed].
@@ -42,9 +45,10 @@ namespace HeartRateLE.Bluetooth
             RateChanged?.Invoke(this, e);
         }
 
-
         public async Task<Schema.HeartRateDevice> ConnectAsync(string deviceId)
         {
+            Disconnect();
+
             _heartRateDevice = await BluetoothLEDevice.FromIdAsync(deviceId);
             if (_heartRateDevice == null)
             {
@@ -56,17 +60,96 @@ namespace HeartRateLE.Bluetooth
             }
 
             // we should always monitor the connection status
-            _heartRateDevice.ConnectionStatusChanged -= _heartRateDevice_ConnectionStatusChanged;
-            _heartRateDevice.ConnectionStatusChanged += _heartRateDevice_ConnectionStatusChanged;
+            _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
+            _heartRateDevice.ConnectionStatusChanged += DeviceConnectionStatusChanged;
+
+            await GetDeviceServicesAsync();
+            var result = await SetupHeartRateCharacteristic();
+            result = await SetupBatteryCharacteristic();
+
+
 
             // we could force propagation of event with connection status change, to run the callback for initial status
-            _heartRateDevice_ConnectionStatusChanged(_heartRateDevice, null);
+            DeviceConnectionStatusChanged(_heartRateDevice, null);
 
             return new Schema.HeartRateDevice()
             {
                 IsConnected = _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected,
                 Name = _heartRateDevice.Name
             };
+        }
+
+        private async Task<List<BluetoothAttribute>> GetServiceCharacteristicsAsync(BluetoothAttribute service)
+        {
+            IReadOnlyList<GattCharacteristic> characteristics = null;
+            try
+            {
+                // Ensure we have access to the device.
+                var accessStatus = await service.service.RequestAccessAsync();
+                if (accessStatus == DeviceAccessStatus.Allowed)
+                {
+                    // BT_Code: Get all the child characteristics of a service. Use the cache mode to specify uncached characterstics only 
+                    // and the new Async functions to get the characteristics of unpaired devices as well. 
+                    var result = await service.service.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
+                    if (result.Status == GattCommunicationStatus.Success)
+                    {
+                        characteristics = result.Characteristics;
+                    }
+                }
+                else
+                {
+                    // Not granted access
+                    // On error, act as if there are no characteristics.
+                    characteristics = new List<GattCharacteristic>();
+                }
+            }
+            catch (Exception ex)
+            {
+                characteristics = new List<GattCharacteristic>();
+            }
+
+            var characteristicCollection = new List<BluetoothAttribute>();
+            characteristicCollection.AddRange(characteristics.Select(a => new BluetoothAttribute(a)));
+            return characteristicCollection;
+        }
+
+        private async Task<CharacteristicResult> SetupHeartRateCharacteristic()
+        {
+            var heartRateService = _serviceCollection.Where(a => a.Name == "HeartRate").FirstOrDefault();
+            var characteristics = await GetServiceCharacteristicsAsync(heartRateService);
+            _heartRateCharacteristic = characteristics.Where(a => a.Name == "HeartRateMeasurement").FirstOrDefault().characteristic;
+            _heartRateCharacteristic.ValueChanged += HeartRateValueChanged;
+            var status = await _heartRateCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+            return new CharacteristicResult()
+            {
+                IsSuccess = status == GattCommunicationStatus.Success,
+                Message = status.ToString()
+            };
+        }
+
+        private async Task<CharacteristicResult> SetupBatteryCharacteristic()
+        {
+            var batteryService = _serviceCollection.Where(a => a.Name == "Battery").FirstOrDefault();
+            var characteristics = await GetServiceCharacteristicsAsync(batteryService);
+            _batteryCharacteristic = characteristics.Where(a => a.Name == "BatteryLevel").FirstOrDefault().characteristic;
+
+            return new CharacteristicResult()
+            {
+                IsSuccess = true
+            };
+        }
+
+        private async Task GetDeviceServicesAsync()
+        {
+            // Note: BluetoothLEDevice.GattServices property will return an empty list for unpaired devices. For all uses we recommend using the GetGattServicesAsync method.
+            // BT_Code: GetGattServicesAsync returns a list of all the supported services of the device (even if it's not paired to the system).
+            // If the services supported by the device are expected to change during BT usage, subscribe to the GattServicesChanged event.
+            GattDeviceServicesResult result = await _heartRateDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+
+            if (result.Status == GattCommunicationStatus.Success)
+            {
+                _serviceCollection.AddRange(result.Services.Select(a => new BluetoothAttribute(a)));
+            }
         }
 
         /// <summary>
@@ -77,12 +160,15 @@ namespace HeartRateLE.Bluetooth
         {
             if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
             {
-                _heartRateDevice.ConnectionStatusChanged -= _heartRateDevice_ConnectionStatusChanged;
+                _heartRateCharacteristic.ValueChanged -= HeartRateValueChanged;
+                _heartRateCharacteristic = null;
+                _batteryCharacteristic = null;
+                _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
                 _heartRateDevice.Dispose();
                 _heartRateDevice = null;
             }
         }
-        private void _heartRateDevice_ConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        private void DeviceConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             var result = new ConnectionStatusChangedEventArgs()
             {
@@ -91,6 +177,21 @@ namespace HeartRateLE.Bluetooth
 
             OnConnectionStatusChanged(result);
         }
+
+        private void HeartRateValueChanged(GattCharacteristic sender, GattValueChangedEventArgs e)
+        {
+            byte[] data;
+            CryptographicBuffer.CopyToByteArray(e.CharacteristicValue, out data);
+
+            var args = new Events.RateChangedEventArgs()
+            {
+                BeatsPerMinute = Utilities.ParseHeartRateValue(data)
+            };
+            OnRateChanged(args);
+        }
+
+
+
 
         /// <summary>
         /// Gets a value indicating whether this instance is connected.
