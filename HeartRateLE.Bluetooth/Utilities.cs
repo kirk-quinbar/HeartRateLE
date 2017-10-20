@@ -15,13 +15,29 @@ namespace HeartRateLE.Bluetooth
     {
         public static async Task<string> ReadCharacteristicValueAsync(List<BluetoothAttribute> characteristics, string characteristicName)
         {
-            var readResult = await characteristics.Where(a => a.Name == characteristicName).FirstOrDefault().characteristic.ReadValueAsync();
+            var characteristic = characteristics.Where(a => a.Name == characteristicName).FirstOrDefault().characteristic;
+            var readResult = await characteristic.ReadValueAsync();
 
             if (readResult.Status == GattCommunicationStatus.Success)
             {
                 byte[] data;
                 CryptographicBuffer.CopyToByteArray(readResult.Value, out data);
-                return Encoding.UTF8.GetString(data);
+
+                if (characteristic.Uuid.Equals(GattCharacteristicUuids.BatteryLevel))
+                {
+                    try
+                    {
+                        // battery level is encoded as a percentage value in the first byte according to
+                        // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.battery_level.xml
+                        return data[0].ToString();
+                    }
+                    catch (ArgumentException)
+                    {
+                        return "0";
+                    }
+                }
+                else
+                    return Encoding.UTF8.GetString(data);
             }
             else
             {

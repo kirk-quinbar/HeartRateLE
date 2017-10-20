@@ -17,7 +17,6 @@ namespace HeartRateLE.Bluetooth
         private BluetoothLEDevice _heartRateDevice = null;
         private List<BluetoothAttribute> _serviceCollection = new List<BluetoothAttribute>();
         private GattCharacteristic _heartRateCharacteristic;
-        private GattCharacteristic _batteryCharacteristic;
 
         /// <summary>
         /// Occurs when [connection status changed].
@@ -65,14 +64,6 @@ namespace HeartRateLE.Bluetooth
 
             CharacteristicResult characteristicResult;
             characteristicResult = await SetupHeartRateCharacteristic();
-            if (!characteristicResult.IsSuccess)
-                return new Schema.HeartRateDevice()
-                {
-                    IsConnected = false,
-                    ErrorMessage = characteristicResult.Message
-                };
-
-            characteristicResult = await SetupBatteryCharacteristic();
             if (!characteristicResult.IsSuccess)
                 return new Schema.HeartRateDevice()
                 {
@@ -167,18 +158,6 @@ namespace HeartRateLE.Bluetooth
 
         }
 
-        private async Task<CharacteristicResult> SetupBatteryCharacteristic()
-        {
-            var batteryService = _serviceCollection.Where(a => a.Name == "Battery").FirstOrDefault();
-            var characteristics = await GetServiceCharacteristicsAsync(batteryService);
-            _batteryCharacteristic = characteristics.Where(a => a.Name == "BatteryLevel").FirstOrDefault().characteristic;
-
-            return new CharacteristicResult()
-            {
-                IsSuccess = true
-            };
-        }
-
         private async Task GetDeviceServicesAsync()
         {
             // Note: BluetoothLEDevice.GattServices property will return an empty list for unpaired devices. For all uses we recommend using the GetGattServicesAsync method.
@@ -208,7 +187,6 @@ namespace HeartRateLE.Bluetooth
                     _heartRateCharacteristic = null;
                 }
 
-                _batteryCharacteristic = null;
                 _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
                 _heartRateDevice.Dispose();
                 _heartRateDevice = null;
@@ -255,23 +233,23 @@ namespace HeartRateLE.Bluetooth
         {
             if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
             {
-                var deviceInformationService = _serviceCollection.Where(a => a.Name == "DeviceInformation").FirstOrDefault();
-                var characteristics = await GetServiceCharacteristicsAsync(deviceInformationService);
+                var deviceInfoService = _serviceCollection.Where(a => a.Name == "DeviceInformation").FirstOrDefault();
+                var deviceInfocharacteristics = await GetServiceCharacteristicsAsync(deviceInfoService);
 
-                var manufacturerNameString = await characteristics.Where(a => a.Name == "ManufacturerNameString").FirstOrDefault().characteristic.ReadValueAsync();
-
+                var batteryService = _serviceCollection.Where(a => a.Name == "Battery").FirstOrDefault();
+                var batteryCharacteristics = await GetServiceCharacteristicsAsync(batteryService);
                 //byte battery = await _batteryParser.ReadAsync();
 
                 return new Schema.HeartRateDeviceInfo()
                 {
                     DeviceId = _heartRateDevice.DeviceId,
                     Name = _heartRateDevice.Name,
-                    Firmware = await Utilities.ReadCharacteristicValueAsync(characteristics, "FirmwareRevisionString"),
-                    Hardware = await Utilities.ReadCharacteristicValueAsync(characteristics, "HardwareRevisionString"),
-                    Manufacturer = await Utilities.ReadCharacteristicValueAsync(characteristics, "ManufacturerNameString"),
-                    SerialNumber = await Utilities.ReadCharacteristicValueAsync(characteristics, "SerialNumberString"),
-                    ModelNumber = await Utilities.ReadCharacteristicValueAsync(characteristics, "ModelNumberString")
-                    //BatteryPercent = Convert.ToInt32(battery)
+                    Firmware = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "FirmwareRevisionString"),
+                    Hardware = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "HardwareRevisionString"),
+                    Manufacturer = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "ManufacturerNameString"),
+                    SerialNumber = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "SerialNumberString"),
+                    ModelNumber = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "ModelNumberString"),
+                    BatteryPercent = Convert.ToInt32(await Utilities.ReadCharacteristicValueAsync(batteryCharacteristics, "BatteryLevel"))
                 };
             }
             else
