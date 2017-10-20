@@ -44,7 +44,7 @@ namespace HeartRateLE.UI
             _heartRateMonitor.RateChanged += HrParserOnValueChanged;
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        protected async override void OnClosing(CancelEventArgs e)
         {
             base.OnClosing(e);
 
@@ -52,7 +52,7 @@ namespace HeartRateLE.UI
             {
                 //await _heartRateMonitor.DisableNotificationsAsync();
                 //await _heartRateMonitor.DisconnectAsync();
-                _heartRateMonitor.Disconnect();
+                await _heartRateMonitor.DisconnectAsync();
             }
         }
 
@@ -73,7 +73,7 @@ namespace HeartRateLE.UI
                 bool connected = args.IsConnected;
                 if (connected)
                 {
-                    var device = _heartRateMonitor.GetDeviceInfo();
+                    var device = await _heartRateMonitor.GetDeviceInfoAsync();
                     TxtStatus.Text = SelectedDeviceName + ": connected";
                     TxtBattery.Text = String.Format("battery level: {0}%", device.BatteryPercent);
                 }
@@ -105,7 +105,7 @@ namespace HeartRateLE.UI
 
         private async void BtnReadInfo_Click(object sender, RoutedEventArgs e)
         {
-            var deviceInfo = _heartRateMonitor.GetDeviceInfo();
+            var deviceInfo = await _heartRateMonitor.GetDeviceInfoAsync();
 
             d($" Manufacturer : {deviceInfo.Manufacturer}"); d("");
             d($"    Model : {deviceInfo.ModelNumber}"); d("");
@@ -138,7 +138,7 @@ namespace HeartRateLE.UI
                 SelectedDeviceName = string.Empty;
 
                 //await _heartRateMonitor.DisableNotificationsAsync();
-                _heartRateMonitor.Disconnect();
+                await _heartRateMonitor.DisconnectAsync();
             }
 
             var devicePicker = new DevicePicker();

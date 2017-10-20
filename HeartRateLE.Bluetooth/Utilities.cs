@@ -1,10 +1,35 @@
-﻿using System;
+﻿using HeartRateLE.Bluetooth.Schema;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
+using Windows.Security.Cryptography;
 using Windows.Storage.Streams;
+using System.Linq;
 
 namespace HeartRateLE.Bluetooth
 {
     public static class Utilities
     {
+        public static async Task<string> ReadCharacteristicValueAsync(List<BluetoothAttribute> characteristics, string characteristicName)
+        {
+            var readResult = await characteristics.Where(a => a.Name == characteristicName).FirstOrDefault().characteristic.ReadValueAsync();
+
+            if (readResult.Status == GattCommunicationStatus.Success)
+            {
+                byte[] data;
+                CryptographicBuffer.CopyToByteArray(readResult.Value, out data);
+                return Encoding.UTF8.GetString(data);
+            }
+            else
+            {
+                return $"Read failed: {readResult.Status}";
+            }
+        }
+
+
         /// <summary>
         ///     Converts from standard 128bit UUID to the assigned 32bit UUIDs. Makes it easy to compare services
         ///     that devices expose to the standard list.
