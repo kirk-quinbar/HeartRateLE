@@ -98,6 +98,10 @@ namespace HeartRateLE.Bluetooth
                     {
                         characteristics = result.Characteristics;
                     }
+                    else
+                    {
+                        characteristics = new List<GattCharacteristic>();
+                    }
                 }
                 else
                 {
