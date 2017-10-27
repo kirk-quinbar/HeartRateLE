@@ -44,12 +44,12 @@ namespace HeartRateLE.Bluetooth
             RateChanged?.Invoke(this, e);
         }
 
-        public async Task<Schema.HeartRateDevice> ConnectAsync(string deviceId)
+        public async Task<ConnectionResult> ConnectAsync(string deviceId)
         {
             _heartRateDevice = await BluetoothLEDevice.FromIdAsync(deviceId);
             if (_heartRateDevice == null)
             {
-                return new Schema.HeartRateDevice()
+                return new Schema.ConnectionResult()
                 {
                     IsConnected = false,
                     ErrorMessage = "Could not find any heart rate device"
@@ -65,7 +65,7 @@ namespace HeartRateLE.Bluetooth
             CharacteristicResult characteristicResult;
             characteristicResult = await SetupHeartRateCharacteristic();
             if (!characteristicResult.IsSuccess)
-                return new Schema.HeartRateDevice()
+                return new Schema.ConnectionResult()
                 {
                     IsConnected = false,
                     ErrorMessage = characteristicResult.Message
@@ -75,7 +75,7 @@ namespace HeartRateLE.Bluetooth
             // we could force propagation of event with connection status change, to run the callback for initial status
             DeviceConnectionStatusChanged(_heartRateDevice, null);
 
-            return new Schema.HeartRateDevice()
+            return new Schema.ConnectionResult()
             {
                 IsConnected = _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected,
                 Name = _heartRateDevice.Name
@@ -186,9 +186,11 @@ namespace HeartRateLE.Bluetooth
                 if (_heartRateCharacteristic != null)
                 {
                     var result = await _heartRateCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
-
-                    _heartRateCharacteristic.ValueChanged -= HeartRateValueChanged;
-                    _heartRateCharacteristic = null;
+                    if (result == GattCommunicationStatus.Success)
+                    {
+                        _heartRateCharacteristic.ValueChanged -= HeartRateValueChanged;
+                        _heartRateCharacteristic = null;
+                    }
                 }
 
                 _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;

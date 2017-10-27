@@ -60,11 +60,11 @@ namespace HeartRateLE.Bluetooth
         /// Gets all paired BLE heart rate devices.
         /// </summary>
         /// <returns></returns>
-        public async Task<List<Schema.HeartRateDevice>> GetAllDevicesAsync()
+        public async Task<List<Schema.ConnectionResult>> GetAllDevicesAsync()
         {
             var devices = await BleHeartRate.FindAll();
 
-            return devices.Select(a => new Schema.HeartRateDevice()
+            return devices.Select(a => new Schema.ConnectionResult()
             {
                 IsConnected = a.IsConnected,
                 Name = a.Name
@@ -76,7 +76,7 @@ namespace HeartRateLE.Bluetooth
         /// </summary>
         /// <param name="deviceName">Name of the device.</param>
         /// <returns></returns>
-        public async Task<Schema.HeartRateDevice> ConnectAsync(string deviceName)
+        public async Task<Schema.ConnectionResult> ConnectAsync(string deviceName)
         {
             if (string.IsNullOrEmpty(deviceName))
             {
@@ -89,7 +89,7 @@ namespace HeartRateLE.Bluetooth
 
             if (_heartRateDevice == null)
             {
-                return new Schema.HeartRateDevice()
+                return new Schema.ConnectionResult()
                 {
                     IsConnected = false,
                     ErrorMessage = "Could not find any heart rate device"
@@ -115,7 +115,7 @@ namespace HeartRateLE.Bluetooth
             // we could force propagation of event with connection status change, to run the callback for initial status
             _heartRateDevice.NotifyConnectionStatus();
 
-            return new Schema.HeartRateDevice()
+            return new Schema.ConnectionResult()
             {
                 IsConnected = _heartRateDevice.IsConnected,
                 Name = _heartRateDevice.Name
@@ -136,7 +136,7 @@ namespace HeartRateLE.Bluetooth
         /// <summary>
         /// Connects the first BLE heart rate device.
         /// </summary>
-        public async Task<Schema.HeartRateDevice> ConnectAsync()
+        public async Task<Schema.ConnectionResult> ConnectAsync()
         {
             return await ConnectAsync(string.Empty);
         }

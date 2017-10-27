@@ -85,7 +85,7 @@
     <Compile Include="Schema\GattNativeCharacteristicUuid.cs" />
     <Compile Include="Schema\GattNativeDescriptorUuid.cs" />
     <Compile Include="Schema\GattNativeServiceUuid.cs" />
-    <Compile Include="Schema\HeartRateDevice.cs" />
+    <Compile Include="Schema\ConnectionResult.cs" />
     <Compile Include="Schema\HeartRateDeviceInfo.cs" />
     <Compile Include="Schema\DeviceSelectorInfo.cs" />
     <Compile Include="Schema\WatcherDevice.cs" />
