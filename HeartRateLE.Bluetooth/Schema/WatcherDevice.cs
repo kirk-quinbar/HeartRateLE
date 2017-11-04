@@ -16,5 +16,6 @@ namespace HeartRateLE.Bluetooth.Schema
         public bool IsPaired { get; set; }
         public string Kind { get; set; }
         public Dictionary<string, object> Properties { get; set; }
+        public Bitmap DeviceThumbnail { get; set; }
     }
 }

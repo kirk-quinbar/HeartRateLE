@@ -16,7 +16,10 @@ namespace HeartRateLE.Bluetooth
     {
         private BluetoothLEDevice _heartRateDevice = null;
         private List<BluetoothAttribute> _serviceCollection = new List<BluetoothAttribute>();
-        private GattCharacteristic _heartRateCharacteristic;
+
+        private BluetoothAttribute _heartRateMeasurementAttribute;
+        private BluetoothAttribute _heartRateAttribute;
+        private GattCharacteristic _heartRateMeasurementCharacteristic;
 
         /// <summary>
         /// Occurs when [connection status changed].
@@ -122,13 +125,32 @@ namespace HeartRateLE.Bluetooth
 
         private async Task<CharacteristicResult> SetupHeartRateCharacteristic()
         {
-            var heartRateService = _serviceCollection.Where(a => a.Name == "HeartRate").FirstOrDefault();
-            var characteristics = await GetServiceCharacteristicsAsync(heartRateService);
-            _heartRateCharacteristic = characteristics.Where(a => a.Name == "HeartRateMeasurement").FirstOrDefault().characteristic;
+            _heartRateAttribute = _serviceCollection.Where(a => a.Name == "HeartRate").FirstOrDefault();
+            if (_heartRateAttribute == null)
+            {
+                return new CharacteristicResult()
+                {
+                    IsSuccess = false,
+                    Message = "Cannot find HeartRate service"
+                };
+            }
+
+            var characteristics = await GetServiceCharacteristicsAsync(_heartRateAttribute);
+            _heartRateMeasurementAttribute = characteristics.Where(a => a.Name == "HeartRateMeasurement").FirstOrDefault();
+            if (_heartRateMeasurementAttribute==null)
+            {
+                return new CharacteristicResult()
+                {
+                    IsSuccess = false,
+                    Message = "Cannot find HeartRateMeasurement characteristic"
+                };
+            }
+            _heartRateMeasurementCharacteristic = _heartRateMeasurementAttribute.characteristic;
+            
 
             // Get all the child descriptors of a characteristics. Use the cache mode to specify uncached descriptors only 
             // and the new Async functions to get the descriptors of unpaired devices as well. 
-            var result = await _heartRateCharacteristic.GetDescriptorsAsync(BluetoothCacheMode.Uncached);
+            var result = await _heartRateMeasurementCharacteristic.GetDescriptorsAsync(BluetoothCacheMode.Uncached);
             if (result.Status != GattCommunicationStatus.Success)
             {
                 return new CharacteristicResult()
@@ -138,11 +160,11 @@ namespace HeartRateLE.Bluetooth
                 };
             }
 
-            if (_heartRateCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
+            if (_heartRateMeasurementCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
             {
-                var status = await _heartRateCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                var status = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
                 if (status == GattCommunicationStatus.Success)
-                    _heartRateCharacteristic.ValueChanged += HeartRateValueChanged;
+                    _heartRateMeasurementCharacteristic.ValueChanged += HeartRateValueChanged;
 
                 return new CharacteristicResult()
                 {
@@ -183,16 +205,18 @@ namespace HeartRateLE.Bluetooth
         {
             if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
             {
-                if (_heartRateCharacteristic != null)
+                if (_heartRateMeasurementCharacteristic != null)
                 {
-                    var result = await _heartRateCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
+                    var result = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
                     if (result == GattCommunicationStatus.Success)
                     {
-                        _heartRateCharacteristic.ValueChanged -= HeartRateValueChanged;
-                        _heartRateCharacteristic = null;
+                        _heartRateMeasurementCharacteristic.ValueChanged -= HeartRateValueChanged;
+                        _heartRateMeasurementCharacteristic = null;
                     }
                 }
 
+                _heartRateMeasurementAttribute = null;
+                _heartRateAttribute = null;
                 _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
                 _heartRateDevice.Dispose();
                 _heartRateDevice = null;

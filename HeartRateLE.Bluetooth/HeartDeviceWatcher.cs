@@ -230,6 +230,8 @@ namespace HeartRateLE.Bluetooth
                 _deviceWatcher = null;
             }
         }
+
+
     }
 }
 
