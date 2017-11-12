@@ -218,6 +218,7 @@ namespace HeartRateLE.Bluetooth
                 _heartRateMeasurementAttribute = null;
                 _heartRateAttribute = null;
                 _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
+                _serviceCollection = null; 
                 _heartRateDevice.Dispose();
                 _heartRateDevice = null;
             }
