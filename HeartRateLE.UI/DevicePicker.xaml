@@ -16,7 +16,7 @@
                     <ColumnDefinition Width="*" MinWidth="100"/>
                 </Grid.ColumnDefinitions>
 
-                <Image Source="{Binding Path=DeviceThumbnail, Mode=OneWay}" Stretch="UniformToFill" Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top"/>
+                <!--<Image Source="{Binding Path=DeviceThumbnail, Mode=OneWay}" Stretch="UniformToFill" Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top"/>-->
 
                 <!--<Border Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top">
                     <Image Source="{Binding Path=GlyphBitmapImage}"
