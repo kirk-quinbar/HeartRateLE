@@ -1,25 +1,25 @@
-﻿using System;
+﻿using HeartRateLE.Bluetooth.Events;
+using HeartRateLE.Bluetooth.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
-using HeartRateLE.Bluetooth.Base;
-using HeartRateLE.Bluetooth.Events;
-using HeartRateLE.Bluetooth.HeartRate;
-using HeartRateLE.Bluetooth.Parsers;
+using Windows.Security.Cryptography;
 
 namespace HeartRateLE.Bluetooth
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class HeartRateMonitor
     {
-        private BleHeartRate _heartRateDevice;
-        private readonly HeartRateMeasurementParser _heartRateParser;
-        private readonly BatteryLevelParser _batteryParser;
+        private BluetoothLEDevice _heartRateDevice = null;
+        private List<BluetoothAttribute> _serviceCollection = new List<BluetoothAttribute>();
+
+        private BluetoothAttribute _heartRateMeasurementAttribute;
+        private BluetoothAttribute _heartRateAttribute;
+        private GattCharacteristic _heartRateMeasurementCharacteristic;
 
         /// <summary>
         /// Occurs when [connection status changed].
@@ -47,49 +47,12 @@ namespace HeartRateLE.Bluetooth
             RateChanged?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HeartRateMonitor"/> class.
-        /// </summary>
-        public HeartRateMonitor()
+        public async Task<ConnectionResult> ConnectAsync(string deviceId)
         {
-            _heartRateParser = new HeartRateMeasurementParser();
-            _batteryParser = new BatteryLevelParser();
-        }
-
-        /// <summary>
-        /// Gets all paired BLE heart rate devices.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<List<Schema.HeartRateDevice>> GetAllDevicesAsync()
-        {
-            var devices = await BleHeartRate.FindAll();
-
-            return devices.Select(a => new Schema.HeartRateDevice()
-            {
-                IsConnected = a.IsConnected,
-                Name = a.Name
-            }).ToList();
-        }
-
-        /// <summary>
-        /// Connects the specified BLE heart rate device name.
-        /// </summary>
-        /// <param name="deviceName">Name of the device.</param>
-        /// <returns></returns>
-        public async Task<Schema.HeartRateDevice> ConnectAsync(string deviceName)
-        {
-            if (string.IsNullOrEmpty(deviceName))
-            {
-                _heartRateDevice = await BleHeartRate.FirstOrDefault();
-            }
-            else
-            {
-                _heartRateDevice = await BleHeartRate.FindByName(deviceName);
-            }
-
+            _heartRateDevice = await BluetoothLEDevice.FromIdAsync(deviceId);
             if (_heartRateDevice == null)
             {
-                return new Schema.HeartRateDevice()
+                return new Schema.ConnectionResult()
                 {
                     IsConnected = false,
                     ErrorMessage = "Could not find any heart rate device"
@@ -97,29 +60,189 @@ namespace HeartRateLE.Bluetooth
             }
 
             // we should always monitor the connection status
-            _heartRateDevice.DeviceConnectionStatusChanged -= BleDeviceConnectionStatusChanged;
-            _heartRateDevice.DeviceConnectionStatusChanged += BleDeviceConnectionStatusChanged;
+            _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
+            _heartRateDevice.ConnectionStatusChanged += DeviceConnectionStatusChanged;
 
-            // we can create value parser and listen for parsed values of given characteristic
-            await _heartRateParser.ConnectWithCharacteristicAsync(_heartRateDevice.HeartRate.HeartRateMeasurement);
-            _heartRateParser.ValueChanged -= BleDeviceValueChanged;
-            _heartRateParser.ValueChanged += BleDeviceValueChanged;
+            await GetDeviceServicesAsync();
 
-            // connect also battery level parser to proper characteristic
-            await _batteryParser.ConnectWithCharacteristicAsync(_heartRateDevice.BatteryService.BatteryLevel);
+            CharacteristicResult characteristicResult;
+            characteristicResult = await SetupHeartRateCharacteristic();
+            if (!characteristicResult.IsSuccess)
+                return new Schema.ConnectionResult()
+                {
+                    IsConnected = false,
+                    ErrorMessage = characteristicResult.Message
+                };
 
-            //            // we can monitor raw data notified by BLE device for specific characteristic
-            //            HrDevice.HeartRate.HeartRateMeasurement.ValueChanged -= HeartRateMeasurementOnValueChanged;
-            //            HrDevice.HeartRate.HeartRateMeasurement.ValueChanged += HeartRateMeasurementOnValueChanged;
 
             // we could force propagation of event with connection status change, to run the callback for initial status
-            _heartRateDevice.NotifyConnectionStatus();
+            DeviceConnectionStatusChanged(_heartRateDevice, null);
 
-            return new Schema.HeartRateDevice()
+            return new Schema.ConnectionResult()
             {
-                IsConnected = _heartRateDevice.IsConnected,
+                IsConnected = _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected,
                 Name = _heartRateDevice.Name
             };
+        }
+
+        private async Task<List<BluetoothAttribute>> GetServiceCharacteristicsAsync(BluetoothAttribute service)
+        {
+            IReadOnlyList<GattCharacteristic> characteristics = null;
+            try
+            {
+                // Ensure we have access to the device.
+                var accessStatus = await service.service.RequestAccessAsync();
+                if (accessStatus == DeviceAccessStatus.Allowed)
+                {
+                    // BT_Code: Get all the child characteristics of a service. Use the cache mode to specify uncached characterstics only 
+                    // and the new Async functions to get the characteristics of unpaired devices as well. 
+                    var result = await service.service.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
+                    if (result.Status == GattCommunicationStatus.Success)
+                    {
+                        characteristics = result.Characteristics;
+                    }
+                    else
+                    {
+                        characteristics = new List<GattCharacteristic>();
+                    }
+                }
+                else
+                {
+                    // Not granted access
+                    // On error, act as if there are no characteristics.
+                    characteristics = new List<GattCharacteristic>();
+                }
+            }
+            catch (Exception ex)
+            {
+                characteristics = new List<GattCharacteristic>();
+            }
+
+            var characteristicCollection = new List<BluetoothAttribute>();
+            characteristicCollection.AddRange(characteristics.Select(a => new BluetoothAttribute(a)));
+            return characteristicCollection;
+        }
+
+        private async Task<CharacteristicResult> SetupHeartRateCharacteristic()
+        {
+            _heartRateAttribute = _serviceCollection.Where(a => a.Name == "HeartRate").FirstOrDefault();
+            if (_heartRateAttribute == null)
+            {
+                return new CharacteristicResult()
+                {
+                    IsSuccess = false,
+                    Message = "Cannot find HeartRate service"
+                };
+            }
+
+            var characteristics = await GetServiceCharacteristicsAsync(_heartRateAttribute);
+            _heartRateMeasurementAttribute = characteristics.Where(a => a.Name == "HeartRateMeasurement").FirstOrDefault();
+            if (_heartRateMeasurementAttribute==null)
+            {
+                return new CharacteristicResult()
+                {
+                    IsSuccess = false,
+                    Message = "Cannot find HeartRateMeasurement characteristic"
+                };
+            }
+            _heartRateMeasurementCharacteristic = _heartRateMeasurementAttribute.characteristic;
+            
+
+            // Get all the child descriptors of a characteristics. Use the cache mode to specify uncached descriptors only 
+            // and the new Async functions to get the descriptors of unpaired devices as well. 
+            var result = await _heartRateMeasurementCharacteristic.GetDescriptorsAsync(BluetoothCacheMode.Uncached);
+            if (result.Status != GattCommunicationStatus.Success)
+            {
+                return new CharacteristicResult()
+                {
+                    IsSuccess = false,
+                    Message = result.Status.ToString()
+                };
+            }
+
+            if (_heartRateMeasurementCharacteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Notify))
+            {
+                var status = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
+                if (status == GattCommunicationStatus.Success)
+                    _heartRateMeasurementCharacteristic.ValueChanged += HeartRateValueChanged;
+
+                return new CharacteristicResult()
+                {
+                    IsSuccess = status == GattCommunicationStatus.Success,
+                    Message = status.ToString()
+                };
+            }
+            else
+            {
+                return new CharacteristicResult()
+                {
+                    IsSuccess = false,
+                    Message = "HeartRateMeasurement characteristic does not support notify"
+                };
+
+            }
+
+        }
+
+        private async Task GetDeviceServicesAsync()
+        {
+            // Note: BluetoothLEDevice.GattServices property will return an empty list for unpaired devices. For all uses we recommend using the GetGattServicesAsync method.
+            // BT_Code: GetGattServicesAsync returns a list of all the supported services of the device (even if it's not paired to the system).
+            // If the services supported by the device are expected to change during BT usage, subscribe to the GattServicesChanged event.
+            GattDeviceServicesResult result = await _heartRateDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+
+            if (result.Status == GattCommunicationStatus.Success)
+            {
+                _serviceCollection.AddRange(result.Services.Select(a => new BluetoothAttribute(a)));
+            }
+        }
+
+        /// <summary>
+        /// Disconnects the current BLE heart rate device.
+        /// </summary>
+        /// <returns></returns>
+        public async Task DisconnectAsync()
+        {
+            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
+            {
+                if (_heartRateMeasurementCharacteristic != null)
+                {
+                    var result = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
+                    if (result == GattCommunicationStatus.Success)
+                    {
+                        _heartRateMeasurementCharacteristic.ValueChanged -= HeartRateValueChanged;
+                        _heartRateMeasurementCharacteristic = null;
+                    }
+                }
+
+                _heartRateMeasurementAttribute = null;
+                _heartRateAttribute = null;
+                _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
+                _serviceCollection = null; 
+                _heartRateDevice.Dispose();
+                _heartRateDevice = null;
+            }
+        }
+        private void DeviceConnectionStatusChanged(BluetoothLEDevice sender, object args)
+        {
+            var result = new ConnectionStatusChangedEventArgs()
+            {
+                IsConnected = (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
+            };
+
+            OnConnectionStatusChanged(result);
+        }
+
+        private void HeartRateValueChanged(GattCharacteristic sender, GattValueChangedEventArgs e)
+        {
+            byte[] data;
+            CryptographicBuffer.CopyToByteArray(e.CharacteristicValue, out data);
+
+            var args = new Events.RateChangedEventArgs()
+            {
+                BeatsPerMinute = Utilities.ParseHeartRateValue(data)
+            };
+            OnRateChanged(args);
         }
 
         /// <summary>
@@ -130,62 +253,7 @@ namespace HeartRateLE.Bluetooth
         /// </value>
         public bool IsConnected
         {
-            get { return _heartRateDevice != null ? _heartRateDevice.IsConnected : false; }
-        }
-
-        /// <summary>
-        /// Connects the first BLE heart rate device.
-        /// </summary>
-        public async Task<Schema.HeartRateDevice> ConnectAsync()
-        {
-            return await ConnectAsync(string.Empty);
-        }
-
-        private void BleDeviceValueChanged(object sender, ValueChangedEventArgs<short> e)
-        {
-            var args = new Events.RateChangedEventArgs()
-            {
-                BeatsPerMinute = e.Value
-            };
-            OnRateChanged(args);
-        }
-
-        private void BleDeviceConnectionStatusChanged(object sender, BleDeviceConnectionStatusChangedEventArgs e)
-        {
-            var args = new ConnectionStatusChangedEventArgs()
-            {
-                IsConnected = (e.ConnectionStatus == BluetoothConnectionStatus.Connected)
-            };
-
-            OnConnectionStatusChanged(args);
-        }
-
-        /// <summary>
-        /// Disconnects the current BLE heart rate device.
-        /// </summary>
-        /// <returns></returns>
-        public async Task DisconnectAsync()
-        {
-            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
-                await _heartRateDevice.CloseAsync();
-        }
-
-        /// <summary>
-        /// Enables the notifications for the current BLE heart rate device.
-        /// </summary>
-        /// <returns></returns>
-        public async Task EnableNotificationsAsync()
-        {
-            await _heartRateParser.EnableNotificationsAsync();
-        }
-
-        /// <summary>
-        /// Disables the notifications for the current BLE heart rate device.
-        /// </summary>
-        /// <returns></returns>
-        public async Task DisableNotificationsAsync()
-        {
-            await _heartRateParser.DisableNotificationsAsync();
+            get { return _heartRateDevice != null ? _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected : false; }
         }
 
         /// <summary>
@@ -196,18 +264,23 @@ namespace HeartRateLE.Bluetooth
         {
             if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
             {
-                byte battery = await _batteryParser.ReadAsync();
+                var deviceInfoService = _serviceCollection.Where(a => a.Name == "DeviceInformation").FirstOrDefault();
+                var deviceInfocharacteristics = await GetServiceCharacteristicsAsync(deviceInfoService);
+
+                var batteryService = _serviceCollection.Where(a => a.Name == "Battery").FirstOrDefault();
+                var batteryCharacteristics = await GetServiceCharacteristicsAsync(batteryService);
+                //byte battery = await _batteryParser.ReadAsync();
 
                 return new Schema.HeartRateDeviceInfo()
                 {
-                    DeviceId = _heartRateDevice.DeviceInfo.Id,
+                    DeviceId = _heartRateDevice.DeviceId,
                     Name = _heartRateDevice.Name,
-                    Firmware = await _heartRateDevice.DeviceInformation.FirmwareRevisionString.ReadAsStringAsync(),
-                    Hardware = await _heartRateDevice.DeviceInformation.HardwareRevisionString.ReadAsStringAsync(),
-                    Manufacturer = await _heartRateDevice.DeviceInformation.ManufacturerNameString.ReadAsStringAsync(),
-                    SerialNumber = await _heartRateDevice.DeviceInformation.SerialNumberString.ReadAsStringAsync(),
-                    ModelNumber = await _heartRateDevice.DeviceInformation.ModelNumberString.ReadAsStringAsync(),
-                    BatteryPercent = Convert.ToInt32(battery)
+                    Firmware = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "FirmwareRevisionString"),
+                    Hardware = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "HardwareRevisionString"),
+                    Manufacturer = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "ManufacturerNameString"),
+                    SerialNumber = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "SerialNumberString"),
+                    ModelNumber = await Utilities.ReadCharacteristicValueAsync(deviceInfocharacteristics, "ModelNumberString"),
+                    BatteryPercent = Convert.ToInt32(await Utilities.ReadCharacteristicValueAsync(batteryCharacteristics, "BatteryLevel"))
                 };
             }
             else

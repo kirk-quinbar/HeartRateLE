@@ -39,9 +39,14 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.InteropServices.WindowsRuntime" />
     <Reference Include="System.Runtime.WindowsRuntime, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>c:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Runtime.WindowsRuntime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.WindowsRuntime.UI.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Runtime.WindowsRuntime.UI.Xaml.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -50,16 +55,20 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Windows">
-      <HintPath>C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.15063.0\Windows.winmd</HintPath>
+      <HintPath>..\..\..\Program Files (x86)\Windows Kits\10\UnionMetadata\Facade\Windows.WinMD</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Windows.Foundation.FoundationContract">
+      <HintPath>..\..\..\Program Files (x86)\Windows Kits\10\References\10.0.15063.0\Windows.Foundation.FoundationContract\3.0.0.0\Windows.Foundation.FoundationContract.winmd</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Windows.Foundation.UniversalApiContract">
+      <HintPath>..\..\..\Program Files (x86)\Windows Kits\10\References\10.0.16299.0\Windows.Foundation.UniversalApiContract\5.0.0.0\Windows.Foundation.UniversalApiContract.winmd</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base\BleBase.cs" />
-    <Compile Include="Base\BleCharacteristic.cs" />
-    <Compile Include="Base\BleDevice.cs" />
-    <Compile Include="Base\BleService.cs" />
-    <Compile Include="Base\BleValueParser.cs" />
     <Compile Include="Events\ConnectionStatusChangedEventArgs.cs" />
     <Compile Include="Events\DeviceRemovedEventArgs.cs" />
     <Compile Include="Events\DeviceUpdatedEventArgs.cs" />
@@ -67,22 +76,22 @@
     <Compile Include="Events\RateChangedEventArgs.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="HeartRateMonitor.cs" />
-    <Compile Include="HeartRate\BleBatteryServiceService.cs" />
-    <Compile Include="HeartRate\BleDeviceInformationService.cs" />
-    <Compile Include="HeartRate\BleHeartRate.cs" />
-    <Compile Include="HeartRate\BleHeartRateService.cs" />
     <Compile Include="PairingHelper.cs" />
-    <Compile Include="Parsers\BatteryLevelParser.cs" />
-    <Compile Include="Parsers\HeartRateMeasurementParser.cs" />
-    <Compile Include="Parsers\StringParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Schema\BluetoothAttributeType.cs" />
+    <Compile Include="Schema\BluetoothAttribute.cs" />
+    <Compile Include="Schema\CharacteristicResult.cs" />
     <Compile Include="Schema\DevicePairingResult.cs" />
     <Compile Include="Schema\DeviceSelector.cs" />
-    <Compile Include="Schema\HeartRateDevice.cs" />
+    <Compile Include="Schema\GattNativeCharacteristicUuid.cs" />
+    <Compile Include="Schema\GattNativeDescriptorUuid.cs" />
+    <Compile Include="Schema\GattNativeServiceUuid.cs" />
+    <Compile Include="Schema\ConnectionResult.cs" />
     <Compile Include="Schema\HeartRateDeviceInfo.cs" />
     <Compile Include="Schema\DeviceSelectorInfo.cs" />
     <Compile Include="Schema\WatcherDevice.cs" />
     <Compile Include="HeartDeviceWatcher.cs" />
+    <Compile Include="Utilities.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

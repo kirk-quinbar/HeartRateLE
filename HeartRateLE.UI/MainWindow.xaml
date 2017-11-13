@@ -25,7 +25,7 @@
                        Margin="0,40"
                        FontSize="106.667"/>
             <Button x:Name="PairDeviceButton"
-                    Content="Pair Device"
+                    Content="Connect Device"
                     IsEnabled="True"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Stretch"

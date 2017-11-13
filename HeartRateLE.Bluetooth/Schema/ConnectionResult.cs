@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace HeartRateLE.Bluetooth.Schema
 {
-    public class HeartRateDevice
+    public class ConnectionResult
     {
         public string DeviceId { get; set; }
         public string Name { get; set; }
         public bool IsConnected { get; set; }
+        public bool HasError { get; set; }
         public string ErrorMessage { get; set; }
     }
 }

@@ -50,7 +50,8 @@ namespace HeartRateLE.UI
 
             if (_heartRateMonitor.IsConnected)
             {
-                await _heartRateMonitor.DisableNotificationsAsync();
+                //await _heartRateMonitor.DisableNotificationsAsync();
+                //await _heartRateMonitor.DisconnectAsync();
                 await _heartRateMonitor.DisconnectAsync();
             }
         }
@@ -90,14 +91,14 @@ namespace HeartRateLE.UI
         private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
             d("Button START clicked.");
-            await _heartRateMonitor.EnableNotificationsAsync();
+            //await _heartRateMonitor.EnableNotificationsAsync();
             d("Notification enabled");
         }
 
         private async void BtnStop_Click(object sender, RoutedEventArgs e)
         {
             d("Button STOP clicked.");
-            await _heartRateMonitor.DisableNotificationsAsync();
+            //await _heartRateMonitor.DisableNotificationsAsync();
             d("Notification disabled.");
             TxtHr.Text = "--";
         }
@@ -136,7 +137,7 @@ namespace HeartRateLE.UI
                 SelectedDeviceId = string.Empty;
                 SelectedDeviceName = string.Empty;
 
-                await _heartRateMonitor.DisableNotificationsAsync();
+                //await _heartRateMonitor.DisableNotificationsAsync();
                 await _heartRateMonitor.DisconnectAsync();
             }
 
@@ -147,8 +148,8 @@ namespace HeartRateLE.UI
                 SelectedDeviceId = devicePicker.SelectedDeviceId;
                 SelectedDeviceName = devicePicker.SelectedDeviceName;
 
-                await _heartRateMonitor.ConnectAsync(SelectedDeviceName);
-                await _heartRateMonitor.EnableNotificationsAsync();
+                await _heartRateMonitor.ConnectAsync(SelectedDeviceId);
+                //await _heartRateMonitor.EnableNotificationsAsync();
             }
         }
 
