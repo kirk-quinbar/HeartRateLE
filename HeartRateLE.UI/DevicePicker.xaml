@@ -4,26 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HeartRateLE.UI"
+        xmlns:schema="clr-namespace:HeartRateLE.Bluetooth.Schema;assembly=HeartRateLE.Bluetooth"
         mc:Ignorable="d"
-        Title="DevicePicker" Height="500" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center">
-
+        Title="DevicePicker" MinHeight="400" MinWidth="600" SizeToContent="Width"
+        d:DataContext="{d:DesignInstance local:DevicePicker}">
     <Window.Resources>
-
-        <DataTemplate x:Key="ResultsListViewTemplate">
+        <DataTemplate x:Key="ResultsListViewTemplate" DataType="{x:Type schema:WatcherDevice}">
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*" MinWidth="100"/>
+                    <ColumnDefinition MinWidth="100"/>
                 </Grid.ColumnDefinitions>
-
-                <!--<Image Source="{Binding Path=DeviceThumbnail, Mode=OneWay}" Stretch="UniformToFill" Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top"/>-->
-
-                <!--<Border Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top">
-                    <Image Source="{Binding Path=GlyphBitmapImage}"
-                           Stretch="UniformToFill"/>
+                <!--<Image Source="{Binding Path=DeviceThumbnail, Mode=OneWay}" Stretch="UniformToFill" Grid.Column="0" 
+                       Height="40" Width="40" Margin="5" VerticalAlignment="Top"/>
+                <Border Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top">
+                    <Image Source="{Binding Path=GlyphBitmapImage}" Stretch="UniformToFill"/>
                 </Border>-->
-                <StackPanel  Grid.Column="1" Margin="5">
-                    <TextBlock  TextWrapping="Wrap">
+                <StackPanel Grid.Column="1" Margin="3">
+                    <TextBlock TextWrapping="Wrap">
                         Name: <Run Text="{Binding Name, Mode=OneWay}" FontWeight="Bold"/>
                     </TextBlock>
                     <TextBlock>
@@ -32,38 +30,44 @@
                 </StackPanel>
             </Grid>
         </DataTemplate>
-
     </Window.Resources>
-
-    <Grid x:Name="RootGrid" Margin="12,20,12,12">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,15,0">
-
+        <StackPanel Grid.Row="0" Orientation="Vertical" Margin="10">
             <TextBlock Text="Manage Bluetooth Devices" FontWeight="Bold" />
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" 
-                               Text="Searching for Bluetooth devices..." />
-
-            <Border BorderBrush="AntiqueWhite" BorderThickness="1" Width="Auto">
-                <StackPanel Orientation="Vertical">
-                    <Label Content="Found devices:" ></Label>
-                    <ListView x:Name="unpairedListView"
-                                  ItemTemplate="{StaticResource ResultsListViewTemplate}"
-                                  ItemsSource="{Binding Path=UnpairedCollection}" Height="250" Width="Auto">
-                    </ListView>
-                </StackPanel>
-            </Border>
+            <TextBlock Text="Searching for Bluetooth devices..."/>
         </StackPanel>
-        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,15,15,0">
-            <Button x:Name="OkButton" Content="Select"  Width="100" Click="OkButton_Click" />
+        <Border Grid.Row="1" BorderBrush="AntiqueWhite" BorderThickness="1" Margin="10">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Content="Found devices:"/>
+                <ListView Grid.Row="1" x:Name="unpairedListView"
+                          ItemTemplate="{StaticResource ResultsListViewTemplate}"
+                          ItemsSource="{Binding UnpairedCollection}"/>
+            </Grid>
+        </Border>
+        <StackPanel Grid.Row="2" Margin="5">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type Button}">
+                    <Style.Setters>
+                        <Setter Property="Width" Value="100"/>
+                        <Setter Property="Margin" Value="5"/>
+                    </Style.Setters>
+                </Style>
+            </StackPanel.Resources>
+            <Button x:Name="OkButton" Content="Select" Click="OkButton_Click"/>
         </StackPanel>
-        <!-- Status Block for providing messages to the user.  Use the
-             NotifyUser() method to populate the message -->
-        <Border x:Name="ErrorBorder" Background="Red" Grid.Row="2"/>
-        <TextBlock x:Name="StatusBlock" Grid.Row="2" Margin="12, 10, 12, 10" Visibility="Collapsed"/>
+        
+        <!-- Status Block for providing messages to the user. Use the NotifyUser() method to populate the message -->
+        <Border Grid.Row="3" x:Name="ErrorBorder" Background="Red"/>
+        <TextBlock Grid.Row="3" x:Name="StatusBlock" Margin="12,10" Visibility="Collapsed"/>
     </Grid>
-
 </Window>
