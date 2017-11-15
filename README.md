@@ -10,7 +10,8 @@ client can be any windows client that can reference a C# library (i.e. windows f
 > know about UWP objects or coding. The client only has to instantiate basic classes and schemas and attach event handlers to
 > the class. 
 >
-In order for this code to work past the windows 10 creator edition, i did a complete rewrite of the bluetooth code. There is a much better bluetooth api available with windows creator edition, unfortunately there was a bug in the actual windows code that prevented the Gattcharacteristic ValueChange event from firing for the HeartRateMeasurement if using a non-uwp application, like i am doing here. Fall Creator edition of Windows
+In order for this code to work past the windows 10 creator edition, i did a complete rewrite of the bluetooth code. There is a much better bluetooth api available with windows creator edition, unfortunately there was a bug in the actual windows code that prevented the Gattcharacteristic ValueChange event from firing for the HeartRateMeasurement if using a non-uwp application, like i am doing here. Fall Creator edition of Windows. Most of the code rewrite is using code similar to the Universal Windows BluetoothLE sample from microsoft.
+https://github.com/Microsoft/Windows-universal-samples/tree/master/Samples/BluetoothLE
 
 Fall Creator update (if you need to manually update)
 https://www.microsoft.com/en-us/software-download/windows10
