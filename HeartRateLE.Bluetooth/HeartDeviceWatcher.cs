@@ -1,8 +1,10 @@
-﻿using System;
+﻿using HeartRateLE.Bluetooth.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
+using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 
 namespace HeartRateLE.Bluetooth
@@ -55,7 +57,6 @@ namespace HeartRateLE.Bluetooth
 
         public HeartDeviceWatcher(Schema.DeviceSelector deviceSelector)
         {
-            //_deviceWatcher = DeviceInformation.CreateWatcher(GetSelector(deviceSelector));
             _deviceWatcher = DeviceInformation.CreateWatcher(
                         GetSelector(deviceSelector),
                         additionalProperties,
@@ -98,113 +99,102 @@ namespace HeartRateLE.Bluetooth
                 OnDeviceEnumerationCompleted(obj);
         }
 
-        //private async Task<bool> IsDeviceCompatible(string deviceId)
-        //{
-        //    var compatibleDevice = true;
-        //    try
-        //    {
-        //        var device = await BluetoothLEDevice.FromIdAsync(deviceId);
-
-        //        //if filters were passed, check if the device name contains one of the names in the list
-        //        if (_filters != null)
-        //        {
-        //            compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
-        //        }
-
-        //        //filter out any devices that are not heart rate devices. with the current bluetooth apis, this will
-        //        //only occur if the device is paired. the windows creator update is supposed to allow for checking for this
-        //        //on unpaired devices, but a recent build completely broke bluetooth le support, so this is the best
-        //        //that can be done for now.
-        //        if (device.GattServices.Any() && compatibleDevice)
-        //        {
-        //            bool matches = true;
-        //            foreach (var requiredService in RequiredServices)
-        //            {
-        //                matches = CheckForCompatibility(device, requiredService.ToGuid());
-        //                if (!matches)
-        //                    break;
-        //            }
-        //            compatibleDevice = matches;
-        //        }
-        //    }
-        //    catch
-        //    {
-
-        //        compatibleDevice = false;
-        //    }
-
-        //    return compatibleDevice;
-        //}
-
-        //private static bool CheckForCompatibility(BluetoothLEDevice device, Guid uuid)
-        //{
-        //    return device.GattServices.Any(service => uuid.Equals(service.Uuid));
-        //}
-
-        private void Added(DeviceWatcher sender, DeviceInformation deviceInformation)
+        private async Task<bool> IsDeviceCompatible(string deviceId)
         {
-            //if (await IsDeviceCompatible(deviceInformation.Id))
-            //{
-            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
-            if (sender == _deviceWatcher)
-            { 
-                var args = new Events.DeviceAddedEventArgs()
-                {
-                    Device = new Schema.WatcherDevice()
-                    {
-                        Id = deviceInformation.Id,
-                        IsDefault = deviceInformation.IsDefault,
-                        IsEnabled = deviceInformation.IsEnabled,
-                        Name = deviceInformation.Name,
-                        IsPaired = deviceInformation.Pairing.IsPaired,
-                        Kind = deviceInformation.Kind.ToString(),
-                        Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
-                    }
-                };
+            var compatibleDevice = true;
+            try
+            {
+                var device = await BluetoothLEDevice.FromIdAsync(deviceId);
 
-                OnDeviceAdded(args);
+                //if filters were passed, check if the device name contains one of the names in the list
+                if (_filters != null)
+                {
+                    return _filters.Any(a => device.Name.CaseInsensitiveContains(a));
+                }
+
+                GattDeviceServicesResult result = await device.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+
+                if (result.Status == GattCommunicationStatus.Success)
+                {
+                    var services = result.Services.Select(a => new BluetoothAttribute(a));
+                    compatibleDevice = services.Any(x => x.Name == "HeartRate");
+                }
+            }
+            catch
+            {
+                compatibleDevice = false;
+            }
+
+            return compatibleDevice;
+        }
+
+        private async void Added(DeviceWatcher sender, DeviceInformation deviceInformation)
+        {
+            if (await IsDeviceCompatible(deviceInformation.Id))
+            {
+                // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+                if (sender == _deviceWatcher)
+                {
+                    var args = new Events.DeviceAddedEventArgs()
+                    {
+                        Device = new Schema.WatcherDevice()
+                        {
+                            Id = deviceInformation.Id,
+                            IsDefault = deviceInformation.IsDefault,
+                            IsEnabled = deviceInformation.IsEnabled,
+                            Name = deviceInformation.Name,
+                            IsPaired = deviceInformation.Pairing.IsPaired,
+                            Kind = deviceInformation.Kind.ToString(),
+                            Properties = deviceInformation.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                        }
+                    };
+
+                    OnDeviceAdded(args);
+                }
             }
         }
 
-        private void Updated(DeviceWatcher sender, DeviceInformationUpdate deviceInformationUpdate)
+        private async void Updated(DeviceWatcher sender, DeviceInformationUpdate deviceInformationUpdate)
         {
-            //if (await IsDeviceCompatible(deviceInformationUpdate.Id))
-            //{
-            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
-            if (sender == _deviceWatcher)
+            if (await IsDeviceCompatible(deviceInformationUpdate.Id))
             {
-                var args = new Events.DeviceUpdatedEventArgs()
+                // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+                if (sender == _deviceWatcher)
                 {
-                    Device = new Schema.WatcherDevice()
+                    var args = new Events.DeviceUpdatedEventArgs()
                     {
-                        Id = deviceInformationUpdate.Id,
-                        Kind = deviceInformationUpdate.Kind.ToString(),
-                        Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
-                    }
-                };
+                        Device = new Schema.WatcherDevice()
+                        {
+                            Id = deviceInformationUpdate.Id,
+                            Kind = deviceInformationUpdate.Kind.ToString(),
+                            Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                        }
+                    };
 
-                OnDeviceUpdated(args);
+                    OnDeviceUpdated(args);
+                }
             }
         }
 
-        private void Removed(DeviceWatcher sender, DeviceInformationUpdate deviceInformationUpdate)
+        private async void Removed(DeviceWatcher sender, DeviceInformationUpdate deviceInformationUpdate)
         {
-            //if (await IsDeviceCompatible(deviceInformationUpdate.Id))
-            //{
-            // Protect against race condition if the task runs after the app stopped the deviceWatcher.
-            if (sender == _deviceWatcher)
+            if (await IsDeviceCompatible(deviceInformationUpdate.Id))
             {
-                var args = new Events.DeviceRemovedEventArgs()
+                // Protect against race condition if the task runs after the app stopped the deviceWatcher.
+                if (sender == _deviceWatcher)
                 {
-                    Device = new Schema.WatcherDevice()
+                    var args = new Events.DeviceRemovedEventArgs()
                     {
-                        Id = deviceInformationUpdate.Id,
-                        Kind = deviceInformationUpdate.Kind.ToString(),
-                        Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
-                    }
-                };
+                        Device = new Schema.WatcherDevice()
+                        {
+                            Id = deviceInformationUpdate.Id,
+                            Kind = deviceInformationUpdate.Kind.ToString(),
+                            Properties = deviceInformationUpdate.Properties.ToDictionary(pair => pair.Key, pair => pair.Value)
+                        }
+                    };
 
-                OnDeviceRemoved(args);
+                    OnDeviceRemoved(args);
+                }
             }
         }
 
@@ -229,8 +219,6 @@ namespace HeartRateLE.Bluetooth
                 _deviceWatcher = null;
             }
         }
-
-
     }
 }
 
