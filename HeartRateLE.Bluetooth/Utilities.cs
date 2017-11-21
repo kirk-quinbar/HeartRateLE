@@ -15,7 +15,10 @@ namespace HeartRateLE.Bluetooth
     {
         public static async Task<string> ReadCharacteristicValueAsync(List<BluetoothAttribute> characteristics, string characteristicName)
         {
-            var characteristic = characteristics.Where(a => a.Name == characteristicName).FirstOrDefault().characteristic;
+            var characteristic = characteristics.FirstOrDefault(a => a.Name == characteristicName)?.characteristic;
+            if (characteristic == null)
+                return "0";
+
             var readResult = await characteristic.ReadValueAsync();
 
             if (readResult.Status == GattCommunicationStatus.Success)
