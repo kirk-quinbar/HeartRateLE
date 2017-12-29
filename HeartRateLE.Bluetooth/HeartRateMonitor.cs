@@ -137,7 +137,7 @@ namespace HeartRateLE.Bluetooth
 
             var characteristics = await GetServiceCharacteristicsAsync(_heartRateAttribute);
             _heartRateMeasurementAttribute = characteristics.Where(a => a.Name == "HeartRateMeasurement").FirstOrDefault();
-            if (_heartRateMeasurementAttribute==null)
+            if (_heartRateMeasurementAttribute == null)
             {
                 return new CharacteristicResult()
                 {
@@ -146,7 +146,7 @@ namespace HeartRateLE.Bluetooth
                 };
             }
             _heartRateMeasurementCharacteristic = _heartRateMeasurementAttribute.characteristic;
-            
+
 
             // Get all the child descriptors of a characteristics. Use the cache mode to specify uncached descriptors only 
             // and the new Async functions to get the descriptors of unpaired devices as well. 
@@ -203,22 +203,34 @@ namespace HeartRateLE.Bluetooth
         /// <returns></returns>
         public async Task DisconnectAsync()
         {
-            if (_heartRateDevice != null && _heartRateDevice.ConnectionStatus == BluetoothConnectionStatus.Connected)
+            if (_heartRateDevice != null)
             {
                 if (_heartRateMeasurementCharacteristic != null)
                 {
                     var result = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
-                    if (result == GattCommunicationStatus.Success)
-                    {
-                        _heartRateMeasurementCharacteristic.ValueChanged -= HeartRateValueChanged;
-                        _heartRateMeasurementCharacteristic = null;
-                    }
+                    _heartRateMeasurementCharacteristic.ValueChanged -= HeartRateValueChanged;
+                    _heartRateMeasurementCharacteristic.Service.Dispose();
+                    _heartRateMeasurementCharacteristic = null;
                 }
 
-                _heartRateMeasurementAttribute = null;
-                _heartRateAttribute = null;
+                if (_heartRateMeasurementAttribute != null)
+                {
+                    _heartRateMeasurementAttribute.service.Dispose();
+                    _heartRateMeasurementAttribute = null;
+                }
+
+                if (_heartRateAttribute != null)
+                {
+                    _heartRateAttribute.service.Dispose();
+                    _heartRateAttribute = null;
+                }
+
+                _serviceCollection = null;
+
+                // we could force propagation of event with connection status change, to run the callback for initial status
+                DeviceConnectionStatusChanged(_heartRateDevice, null);
+
                 _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
-                _serviceCollection = null; 
                 _heartRateDevice.Dispose();
                 _heartRateDevice = null;
             }

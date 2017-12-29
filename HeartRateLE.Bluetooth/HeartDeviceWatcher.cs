@@ -104,20 +104,13 @@ namespace HeartRateLE.Bluetooth
             var compatibleDevice = true;
             try
             {
-                var device = await BluetoothLEDevice.FromIdAsync(deviceId);
-
                 //if filters were passed, check if the device name contains one of the names in the list
                 if (_filters != null)
                 {
-                    return _filters.Any(a => device.Name.CaseInsensitiveContains(a));
-                }
-
-                GattDeviceServicesResult result = await device.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-
-                if (result.Status == GattCommunicationStatus.Success)
-                {
-                    var services = result.Services.Select(a => new BluetoothAttribute(a));
-                    compatibleDevice = services.Any(x => x.Name == "HeartRate");
+                    using (var device = await BluetoothLEDevice.FromIdAsync(deviceId))
+                    {
+                        compatibleDevice = _filters.Any(a => device.Name.CaseInsensitiveContains(a));
+                    }                            
                 }
             }
             catch
