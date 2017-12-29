@@ -135,7 +135,6 @@ namespace HeartRateLE.UI
                 SelectedDeviceId = string.Empty;
                 SelectedDeviceName = string.Empty;
 
-                //await _heartRateMonitor.DisableNotificationsAsync();
                 await _heartRateMonitor.DisconnectAsync();
             }
 
@@ -146,8 +145,9 @@ namespace HeartRateLE.UI
                 SelectedDeviceId = devicePicker.SelectedDeviceId;
                 SelectedDeviceName = devicePicker.SelectedDeviceName;
 
-                await _heartRateMonitor.ConnectAsync(SelectedDeviceId);
-                //await _heartRateMonitor.EnableNotificationsAsync();
+                var connectResult= await _heartRateMonitor.ConnectAsync(SelectedDeviceId);
+                if (!connectResult.IsConnected)
+                    MessageBox.Show(connectResult.ErrorMessage);
             }
         }
 

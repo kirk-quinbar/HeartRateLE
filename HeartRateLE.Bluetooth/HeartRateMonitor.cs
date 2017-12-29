@@ -55,7 +55,17 @@ namespace HeartRateLE.Bluetooth
                 return new Schema.ConnectionResult()
                 {
                     IsConnected = false,
-                    ErrorMessage = "Could not find any heart rate device"
+                    ErrorMessage = "Could not find specified heart rate device"
+                };
+            }
+
+            if (!_heartRateDevice.DeviceInformation.Pairing.IsPaired)
+            {
+                _heartRateDevice = null;
+                return new Schema.ConnectionResult()
+                {
+                    IsConnected = false,
+                    ErrorMessage = "Heart rate device is not paired"
                 };
             }
 
@@ -63,7 +73,16 @@ namespace HeartRateLE.Bluetooth
             _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
             _heartRateDevice.ConnectionStatusChanged += DeviceConnectionStatusChanged;
 
-            await GetDeviceServicesAsync();
+            var isReachable = await GetDeviceServicesAsync();
+            if (!isReachable)
+            {
+                _heartRateDevice = null;
+                return new Schema.ConnectionResult()
+                {
+                    IsConnected = false,
+                    ErrorMessage = "Heart rate device is unreachable (i.e. out of range or shutoff)"
+                };
+            }
 
             CharacteristicResult characteristicResult;
             characteristicResult = await SetupHeartRateCharacteristic();
@@ -184,7 +203,7 @@ namespace HeartRateLE.Bluetooth
 
         }
 
-        private async Task GetDeviceServicesAsync()
+        private async Task<bool> GetDeviceServicesAsync()
         {
             // Note: BluetoothLEDevice.GattServices property will return an empty list for unpaired devices. For all uses we recommend using the GetGattServicesAsync method.
             // BT_Code: GetGattServicesAsync returns a list of all the supported services of the device (even if it's not paired to the system).
@@ -194,6 +213,11 @@ namespace HeartRateLE.Bluetooth
             if (result.Status == GattCommunicationStatus.Success)
             {
                 _serviceCollection.AddRange(result.Services.Select(a => new BluetoothAttribute(a)));
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
