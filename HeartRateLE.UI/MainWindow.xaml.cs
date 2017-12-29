@@ -50,8 +50,6 @@ namespace HeartRateLE.UI
 
             if (_heartRateMonitor.IsConnected)
             {
-                //await _heartRateMonitor.DisableNotificationsAsync();
-                //await _heartRateMonitor.DisconnectAsync();
                 await _heartRateMonitor.DisconnectAsync();
             }
         }

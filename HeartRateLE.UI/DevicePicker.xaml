@@ -15,21 +15,22 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*" MinWidth="100"/>
                 </Grid.ColumnDefinitions>
-
-                <!--<Image Source="{Binding Path=DeviceThumbnail, Mode=OneWay}" Stretch="UniformToFill" Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top"/>-->
-
                 <!--<Border Grid.Column="0" Height="40" Width="40" Margin="5" VerticalAlignment="Top">
                     <Image Source="{Binding Path=GlyphBitmapImage}"
                            Stretch="UniformToFill"/>
                 </Border>-->
-                <StackPanel  Grid.Column="1" Margin="5">
-                    <TextBlock  TextWrapping="Wrap">
-                        Name: <Run Text="{Binding Name, Mode=OneWay}" FontWeight="Bold"/>
-                    </TextBlock>
-                    <TextBlock>
-                        Id: <Run Text="{Binding Id, Mode=OneWay}"/>
-                    </TextBlock>
-                </StackPanel>
+                <Border Grid.Column="1" Margin="5">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Name:" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding Path=Name}" FontWeight="Bold" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Id:" Margin="0,0,5,0"/>
+                            <TextBlock Text="{Binding Path=Id}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
         </DataTemplate>
 
@@ -49,13 +50,25 @@
 
             <Border BorderBrush="AntiqueWhite" BorderThickness="1" Width="Auto">
                 <StackPanel Orientation="Vertical">
-                    <Label Content="Found devices:" ></Label>
+                    <Label Content="Unpaired devices:" ></Label>
                     <ListView x:Name="unpairedListView"
                                   ItemTemplate="{StaticResource ResultsListViewTemplate}"
-                                  ItemsSource="{Binding Path=UnpairedCollection}" Height="250" Width="Auto">
+                                  ItemsSource="{Binding Path=UnpairedCollection}" Height="100" Width="Auto">
                     </ListView>
                 </StackPanel>
             </Border>
+            <Button x:Name="PairDeviceButton" Content="Pair" Click="PairDeviceButton_Click"/>
+
+            <Border BorderBrush="AntiqueWhite" BorderThickness="1" Width="Auto">
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Paired devices:" ></Label>
+                    <ListView x:Name="pairedListView"
+                                  ItemTemplate="{StaticResource ResultsListViewTemplate}"
+                                  ItemsSource="{Binding Path=PairedCollection}" Height="100" Width="Auto">
+                    </ListView>
+                </StackPanel>
+            </Border>
+            <Button x:Name="UnpairDeviceButton" Content="Unpair" Click="UnpairDeviceButton_Click"/>
         </StackPanel>
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,15,15,0">
             <Button x:Name="OkButton" Content="Select"  Width="100" Click="OkButton_Click" />

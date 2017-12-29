@@ -208,38 +208,38 @@ namespace HeartRateLE.Bluetooth
                 if (_heartRateMeasurementCharacteristic != null)
                 {
                     var result = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
-                    _heartRateMeasurementCharacteristic.ValueChanged -= HeartRateValueChanged;
-                    _heartRateMeasurementCharacteristic.Service.Dispose();
+                    if (_heartRateMeasurementCharacteristic.Service != null)
+                        _heartRateMeasurementCharacteristic.Service.Dispose();
                     _heartRateMeasurementCharacteristic = null;
                 }
 
                 if (_heartRateMeasurementAttribute != null)
                 {
-                    _heartRateMeasurementAttribute.service.Dispose();
+                    if (_heartRateMeasurementAttribute.service != null)
+                        _heartRateMeasurementAttribute.service.Dispose();
                     _heartRateMeasurementAttribute = null;
                 }
 
                 if (_heartRateAttribute != null)
                 {
-                    _heartRateAttribute.service.Dispose();
+                    if (_heartRateAttribute.service != null)
+                        _heartRateAttribute.service.Dispose();
                     _heartRateAttribute = null;
                 }
 
-                _serviceCollection = null;
+                _serviceCollection = new List<BluetoothAttribute>();
 
-                // we could force propagation of event with connection status change, to run the callback for initial status
-                DeviceConnectionStatusChanged(_heartRateDevice, null);
-
-                _heartRateDevice.ConnectionStatusChanged -= DeviceConnectionStatusChanged;
                 _heartRateDevice.Dispose();
                 _heartRateDevice = null;
+
+                DeviceConnectionStatusChanged(null, null);
             }
         }
         private void DeviceConnectionStatusChanged(BluetoothLEDevice sender, object args)
         {
             var result = new ConnectionStatusChangedEventArgs()
             {
-                IsConnected = (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
+                IsConnected = sender != null && (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
             };
 
             OnConnectionStatusChanged(result);
