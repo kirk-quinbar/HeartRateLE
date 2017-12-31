@@ -231,6 +231,7 @@ namespace HeartRateLE.Bluetooth
             {
                 if (_heartRateMeasurementCharacteristic != null)
                 {
+                    //NOTE: might want to do something here if the result is not successful
                     var result = await _heartRateMeasurementCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue.None);
                     if (_heartRateMeasurementCharacteristic.Service != null)
                         _heartRateMeasurementCharacteristic.Service.Dispose();
