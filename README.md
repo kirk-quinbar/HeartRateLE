@@ -6,7 +6,7 @@ This repository contains an example of using the WinRT API to pair and connect t
 
 In order for this code to work past the Windows 10 Creator Edition, I did a complete rewrite of the Bluetooth code. There is a much better Bluetooth API available with Windows Creator Edition.
 
-Windows Fall Creator Update (if you need to manually update) <https://www.microsoft.com/en-us/software-download/windows10>
+Windows Fall 2018 Creator Update (v 1709) (if you need to manually update) <https://www.microsoft.com/en-us/software-download/windows10>
 
 Windows 10 SDK version 10.0.16299.0 <https://developer.microsoft.com/en-us/windows/downloads/windows-10-sdk>
 
