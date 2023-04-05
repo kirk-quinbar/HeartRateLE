@@ -19,4 +19,4 @@ Specifically, this sample shows how to:
 - Subscribe to device events such as connection status changed and value changed
 
 ## Resources
-https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/desktop-to-uwp-enhance
+
